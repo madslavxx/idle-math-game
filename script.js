@@ -178,7 +178,6 @@ function gameLoop() {
   kp += kpPerSecond / 10;
   updateDisplay();
   saveGame();
-  renderUpgrades();
 }
 
 loadGame();
