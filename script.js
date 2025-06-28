@@ -51,9 +51,9 @@ function addUpgrade(name, cost, effect, description) {
 
 
 function initUpgrades() {
-  addUpgrade("Loops", 25, () => kpPerSecond += 1, "Teaches repetitive tasks—+1 KP/sec");
-  addUpgrade("Recursion", 100, () => { kpPerClick *= 2; }, "A function that calls itself—doubles KP per click");
-  addUpgrade("Fibonacci", 200, () => kpPerSecond += 5, "Generates a recursive math sequence—+5 KP/sec");
+  addUpgrade("Loops", 25, () => kpPerSecond += 1, "Teaches repetitive tasks — +1 KP/sec");
+  addUpgrade("Recursion", 100, () => { kpPerClick *= 2; }, "A function that calls itself — doubles KP per click");
+  addUpgrade("Fibonacci", 200, () => kpPerSecond += 5, "Generates a recursive math sequence — +5 KP/sec");
 }
 
 function saveGame() {
