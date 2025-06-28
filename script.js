@@ -86,7 +86,6 @@ const upgrades = [
       // Reset all upgrades
       upgrades.forEach(u => {
         u.unlocked = false;
-        u.bought = false;
       });
     },
     description: "Reset your progress for a significant boost — resets KP and upgrades",
