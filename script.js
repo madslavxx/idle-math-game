@@ -1,7 +1,7 @@
 let kp = 0;
 let kpPerClick = 1;
 let kpPerSecond = 0;
-prestiges = 0;
+let prestiges = 0;
 
 const tooltip = document.getElementById("tooltip");
 const display = document.getElementById("kp-display");
