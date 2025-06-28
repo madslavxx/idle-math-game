@@ -1,8 +1,8 @@
-# Code Increment – A Math-Based Idle Game
+# STEM Incremental – A Math-Based Idle Game
 
 **By Logan Suvajdzin**
 
-Code Increment is a creative idle/clicker game that teaches players math and computer science concepts through gameplay.
+STEM Incremental is a creative idle/clicker game that teaches players math and computer science concepts through gameplay.
 
 ## 🔧 How It Works
 
@@ -22,10 +22,6 @@ Each upgrade is inspired by real concepts:
 - HTML, CSS, JavaScript
 - No external libraries
 - Saves using browser `localStorage`
-
-## 📌 No AI Used
-
-This project does not use AI in any form. All mechanics and content were coded manually.
 
 ## 🔗 How to Play
 
