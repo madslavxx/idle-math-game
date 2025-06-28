@@ -1,6 +1,7 @@
 let kp = 0;
 let kpPerClick = 1;
 let kpPerSecond = 0;
+prestiges = 0;
 
 const tooltip = document.getElementById("tooltip");
 const display = document.getElementById("kp-display");
@@ -73,6 +74,23 @@ const upgrades = [
     effect: () => { kpPerSecond += 50; },
     description: "Abstract machine that can simulate any algorithm — +50 KP/sec",
     unlocked: false,
+  },
+  {
+    name: "Prestige",
+    cost: 25000,
+    effect: () => {
+      kpPerSecond = 0;
+      kpPerClick = 1;
+      kp = 0;
+      prestiges += 1;
+      // Reset all upgrades
+      upgrades.forEach(u => {
+        u.unlocked = false;
+        u.bought = false;
+      });
+    },
+    description: "Reset your progress for a significant boost — resets KP and upgrades",
+    unlocked: false,
   }
 ];
 
@@ -100,8 +118,7 @@ function renderUpgrades() {
     if (!upgrade.unlocked && kp >= upgrade.cost * 0.7) {
       upgrade.unlocked = true;
     }
-
-    if (upgrade.unlocked) {
+    else if (upgrade.unlocked) {
       const btn = document.createElement("button");
       btn.className = "upgrade";
       btn.textContent = `${upgrade.name} (${upgrade.cost} KP)`;
