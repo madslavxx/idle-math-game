@@ -51,9 +51,44 @@ function addUpgrade(name, cost, effect, description) {
 
 
 function initUpgrades() {
-  addUpgrade("Loops", 25, () => kpPerSecond += 1, "Teaches repetitive tasks — +1 KP/sec");
-  addUpgrade("Recursion", 100, () => { kpPerClick *= 2; }, "A function that calls itself — doubles KP per click");
-  addUpgrade("Fibonacci", 200, () => kpPerSecond += 5, "Generates a recursive math sequence — +5 KP/sec");
+  addUpgrade("Loops", 25,
+    () => kpPerSecond += 1,
+    "Teaches repetitive tasks — +1 KP/sec");
+
+  addUpgrade("Recursion", 100,
+    () => { kpPerClick *= 2; },
+    "A function that calls itself — doubles KP per click");
+
+  addUpgrade("Fibonacci", 200,
+    () => kpPerSecond += 5,
+    "Generates a recursive math sequence — +5 KP/sec");
+
+  addUpgrade("Exponentiation", 500,
+    () => kpPerClick += 10,
+    "Exponentiation increases power rapidly — +10 KP per click");
+
+  addUpgrade("Sorting Algorithms", 800,
+    () => kpPerSecond += 10,
+    "Improves data organization — +10 KP/sec");
+
+  addUpgrade("Binary Trees", 1200,
+    () => kpPerClick += 20,
+    "Hierarchical data structure — +20 KP per click");
+
+  addUpgrade("Graph Theory", 2000,
+    () => kpPerSecond += 25,
+    "Analyzing networks and connections — +25 KP/sec");
+
+  addUpgrade("Big O Notation", 3000,
+    () => {
+      kpPerClick *= 1.5;
+      kpPerSecond *= 1.5;
+    },
+    "Measures algorithm efficiency — boosts both KP/sec and KP/click");
+
+  addUpgrade("Turing Machine", 5000,
+    () => kpPerSecond += 50,
+    "Abstract machine that can simulate any algorithm — +50 KP/sec");
 }
 
 function saveGame() {
