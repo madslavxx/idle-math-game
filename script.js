@@ -2,6 +2,7 @@ let kp = 0;
 let kpPerClick = 1;
 let kpPerSecond = 0;
 
+const tooltip = document.getElementById("tooltip");
 const display = document.getElementById("kp-display");
 const clickBtn = document.getElementById("click-btn");
 const upgradeContainer = document.getElementById("upgrade-container");
@@ -19,8 +20,23 @@ function addUpgrade(name, cost, effect, description) {
   const btn = document.createElement("button");
   btn.className = "upgrade";
   btn.textContent = `${name} (${cost} KP)`;
-  btn.title = description;
 
+  // Show tooltip on hover
+  btn.addEventListener("mouseenter", (e) => {
+    tooltip.textContent = description;
+    tooltip.classList.remove("hidden");
+    positionTooltip(e);
+  });
+
+  btn.addEventListener("mousemove", (e) => {
+    positionTooltip(e);
+  });
+
+  btn.addEventListener("mouseleave", () => {
+    tooltip.classList.add("hidden");
+  });
+
+  // On click
   btn.addEventListener("click", () => {
     if (kp >= cost) {
       kp -= cost;
@@ -32,6 +48,7 @@ function addUpgrade(name, cost, effect, description) {
 
   upgradeContainer.appendChild(btn);
 }
+
 
 function initUpgrades() {
   addUpgrade("Loops", 25, () => kpPerSecond += 1, "Teaches repetitive tasks—+1 KP/sec");
@@ -61,6 +78,12 @@ function gameLoop() {
   kp += kpPerSecond / 10;
   updateDisplay();
   saveGame();
+}
+
+function positionTooltip(e) {
+  const offset = 15;
+  tooltip.style.left = `${e.pageX + offset}px`;
+  tooltip.style.top = `${e.pageY + offset}px`;
 }
 
 loadGame();

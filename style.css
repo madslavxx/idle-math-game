@@ -25,3 +25,20 @@ button:hover {
 .upgrade {
   margin: 0.5rem;
 }
+
+#tooltip {
+  position: absolute;
+  background-color: #222;
+  color: #0f0;
+  border: 1px solid #0f0;
+  padding: 8px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  max-width: 250px;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.hidden {
+  display: none;
+}
