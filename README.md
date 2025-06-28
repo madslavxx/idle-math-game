@@ -1,6 +1,6 @@
 # Code Increment – A Math-Based Idle Game
 
-**By Logan [Age 14–17 Category]**
+**By Logan Suvajdzin**
 
 Code Increment is a creative idle/clicker game that teaches players math and computer science concepts through gameplay.
 
