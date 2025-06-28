@@ -14,7 +14,6 @@ const upgrades = [
     effect: () => { kpPerSecond += 1; },
     description: "Teaches repetitive tasks — +1 KP/sec",
     unlocked: false,
-    bought: false,
   },
   {
     name: "Recursion",
@@ -22,7 +21,6 @@ const upgrades = [
     effect: () => { kpPerClick *= 2; },
     description: "A function that calls itself — doubles KP per click",
     unlocked: false,
-    bought: false,
   },
   {
     name: "Fibonacci",
@@ -30,7 +28,6 @@ const upgrades = [
     effect: () => { kpPerSecond += 5; },
     description: "Generates a recursive math sequence — +5 KP/sec",
     unlocked: false,
-    bought: false,
   },
   {
     name: "Exponentiation",
@@ -38,7 +35,6 @@ const upgrades = [
     effect: () => { kpPerClick += 10; },
     description: "Exponentiation increases power rapidly — +10 KP per click",
     unlocked: false,
-    bought: false,
   },
   {
     name: "Sorting Algorithms",
@@ -46,7 +42,6 @@ const upgrades = [
     effect: () => { kpPerSecond += 10; },
     description: "Improves data organization — +10 KP/sec",
     unlocked: false,
-    bought: false,
   },
   {
     name: "Binary Trees",
@@ -54,7 +49,6 @@ const upgrades = [
     effect: () => { kpPerClick += 20; },
     description: "Hierarchical data structure — +20 KP per click",
     unlocked: false,
-    bought: false,
   },
   {
     name: "Graph Theory",
@@ -62,7 +56,6 @@ const upgrades = [
     effect: () => { kpPerSecond += 25; },
     description: "Analyzing networks and connections — +25 KP/sec",
     unlocked: false,
-    bought: false,
   },
   {
     name: "Big O Notation",
@@ -73,7 +66,6 @@ const upgrades = [
     },
     description: "Measures algorithm efficiency — boosts both KP/sec and KP/click",
     unlocked: false,
-    bought: false,
   },
   {
     name: "Turing Machine",
@@ -81,7 +73,6 @@ const upgrades = [
     effect: () => { kpPerSecond += 50; },
     description: "Abstract machine that can simulate any algorithm — +50 KP/sec",
     unlocked: false,
-    bought: false,
   }
 ];
 
@@ -110,7 +101,7 @@ function renderUpgrades() {
       upgrade.unlocked = true;
     }
 
-    if (upgrade.unlocked && !upgrade.bought) {
+    if (upgrade.unlocked) {
       const btn = document.createElement("button");
       btn.className = "upgrade";
       btn.textContent = `${upgrade.name} (${upgrade.cost} KP)`;
