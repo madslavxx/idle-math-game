@@ -1,3 +1,17 @@
+// === SOUND EFFECTS ===
+const clickSound    = new Audio('sounds/click.wav');
+const upgradeSound  = new Audio('sounds/upgrade.wav');
+const prestigeSound = new Audio('sounds/prestige.wav');
+
+[ clickSound, upgradeSound, prestigeSound ].forEach(s => s.load());
+
+let isMuted = false;
+const muteBtn = document.getElementById("mute-btn");
+
+// Load mute setting from localStorage if it exists
+isMuted = localStorage.getItem("muteSetting") === "true";
+updateMuteButton();
+
 let kp = 0;
 let kpPerClick = 1;
 let kpPerSecond = 0;
@@ -20,10 +34,21 @@ function updatePrestigeDisplay() {
 }
 
 const upgrades = [
-  { name: "Loops", cost: 25,       effect: () => { kpPerSecond += 1; },
-    description: "Teaches repetitive tasks — +1 KP/sec", unlocked: false },
-  { name: "Recursion", cost: 100,  effect: () => { kpPerClick *= 2; },
-    description: "A function that calls itself — doubles KP per click", unlocked: false },
+  { name: "Loops",
+    cost: 25,       
+    effect: () => { kpPerSecond += 1; },
+    description: "Teaches repetitive tasks — +1 KP/sec", 
+    unlocked: false 
+  },
+  {
+    name: "Recursion",
+    cost: 100,
+    effect: () => {
+      kpPerClick = kpPerClick * 1.2 + 2;
+    },
+    description: "Gives a modest recursive boost — +2 KP/click and +20%",
+    unlocked: false,
+  },
   { name: "Fibonacci", cost: 200,  effect: () => { kpPerSecond += 5; },
     description: "Generates a recursive math sequence — +5 KP/sec", unlocked: false },
   { name: "Exponentiation", cost: 500, effect: () => { kpPerClick += 10; },
@@ -45,10 +70,12 @@ const upgrades = [
     effect: () => {
       resetOverlay.classList.add("active");
       setTimeout(() => {
+        if (!isMuted) {
+          clickSound.currentTime = 0;
+          clickSound.play();
+        }
         prestiges += 1;
-        kp = 0;
-        kpPerClick = 1;
-        kpPerSecond = 0;
+        kp = 0; kpPerClick = 1; kpPerSecond = 0;
         upgrades.forEach(u => u.unlocked = false);
         updateDisplay();
         renderUpgrades();
@@ -64,10 +91,15 @@ const upgrades = [
 upgrades[0].unlocked = true;
 
 clickBtn.addEventListener("click", () => {
+  if (!isMuted) {
+    clickSound.currentTime = 0;
+    clickSound.play();
+  }
   kp += kpPerClick * getPrestigeMultiplier();
   updateDisplay();
   renderUpgrades();
 });
+
 
 function updateDisplay() {
   display.textContent = `Knowledge Points: ${Math.floor(kp)}`;
@@ -103,18 +135,31 @@ function renderUpgrades() {
 
       btn.addEventListener("click", () => {
         if (kp >= upgrade.cost) {
+          if (!isMuted) {
+            clickSound.currentTime = 0;
+            clickSound.play();
+          }
           kp -= upgrade.cost;
           upgrade.effect();
-          upgrade.unlocked = false;   // hide it after purchase
+          upgrade.unlocked = false;
           updateDisplay();
           renderUpgrades();
         }
       });
-
       upgradeContainer.appendChild(btn);
     }
   });
 }
+
+function updateMuteButton() {
+  muteBtn.textContent = isMuted ? "🔇 Sound: Off" : "🔊 Sound: On";
+}
+
+muteBtn.addEventListener("click", () => {
+  isMuted = !isMuted;
+  localStorage.setItem("muteSetting", isMuted);
+  updateMuteButton();
+});
 
 function saveGame() {
   const saveData = {
