@@ -3,10 +3,19 @@ let kpPerClick = 1;
 let kpPerSecond = 0;
 let prestiges = 0;
 
+function getPrestigeMultiplier() {
+  return 1 + prestiges * 0.2; // 20% bonus per prestige
+}
+
 const tooltip = document.getElementById("tooltip");
 const display = document.getElementById("kp-display");
 const clickBtn = document.getElementById("click-btn");
 const upgradeContainer = document.getElementById("upgrade-container");
+const prestigeDisplay = document.getElementById("prestige-display");
+
+function updatePrestigeDisplay() {
+  prestigeDisplay.textContent = `Prestiges: ${prestiges} (x${getPrestigeMultiplier().toFixed(1)} KP/click boost)`;
+}
 
 const upgrades = [
   {
@@ -77,30 +86,35 @@ const upgrades = [
   },
   {
     name: "Prestige",
-    cost: 25000,
+    cost: 50000,
+    unlocked: false,
+    description: "Reset your progress for a significant boost to your KP gain",
     effect: () => {
-      kpPerSecond = 0;
-      kpPerClick = 1;
-      kp = 0;
       prestiges += 1;
-      // Reset all upgrades
+
+      // Reset all progress but keep prestige count
+      kp = 0;
+      kpPerClick = 1;
+      kpPerSecond = 0;
+
       upgrades.forEach(u => {
         u.unlocked = false;
+        u.bought = false;
       });
-    },
-    description: "Reset your progress for a significant boost — resets KP and upgrades",
-    unlocked: false,
+    updateDisplay();
+    }
   }
 ];
 
 clickBtn.addEventListener("click", () => {
-  kp += kpPerClick;
+  kp += kpPerClick * getPrestigeMultiplier();
   updateDisplay();
   renderUpgrades();
 });
 
 function updateDisplay() {
   display.textContent = `Knowledge Points: ${Math.floor(kp)}`;
+  updatePrestigeDisplay();
 }
 
 function positionTooltip(e) {
@@ -156,6 +170,7 @@ function saveGame() {
     kp,
     kpPerClick,
     kpPerSecond,
+    prestiges,
     upgradesState: upgrades.map(u => ({ unlocked: u.unlocked, bought: u.bought }))
   };
   localStorage.setItem("mathIdleSave", JSON.stringify(saveData));
@@ -167,12 +182,12 @@ function loadGame() {
     kp = saveData.kp;
     kpPerClick = saveData.kpPerClick;
     kpPerSecond = saveData.kpPerSecond;
+    prestiges = saveData.prestiges || 0;
 
     if (saveData.upgradesState) {
       saveData.upgradesState.forEach((state, i) => {
         upgrades[i].unlocked = state.unlocked;
         upgrades[i].bought = state.bought;
-        // If bought, apply effect again to keep state consistent
         if (upgrades[i].bought) {
           upgrades[i].effect();
         }
