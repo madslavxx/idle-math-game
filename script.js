@@ -53,9 +53,30 @@ function updateDisplay() {
 
 // === TOOLTIP POSITIONER ===
 function positionTooltip(e) {
-  const offset = 15;
-  tooltip.style.left = `${e.pageX + offset}px`;
-  tooltip.style.top  = `${e.pageY + offset}px`;
+  const offset = 12;
+  // viewport coordinates
+  let x = e.clientX + offset;
+  let y = e.clientY + offset;
+
+  // un-hide to measure
+  tooltip.classList.remove("hidden");
+  tooltip.classList.add("visible");
+  tooltip.style.left = "0px";  // reset before measure
+  tooltip.style.top = "0px";
+
+  // measure after becoming visible
+  const { width, height } = tooltip.getBoundingClientRect();
+
+  // flip if going off screen
+  if (x + width > window.innerWidth) {
+    x = e.clientX - width - offset;
+  }
+  if (y + height > window.innerHeight) {
+    y = e.clientY - height - offset;
+  }
+
+  tooltip.style.left = `${x}px`;
+  tooltip.style.top  = `${y}px`;
 }
 
 // === UPGRADE DATA ===
@@ -193,15 +214,22 @@ function renderUpgrades() {
     btn.className = "upgrade";
     btn.textContent = `${u.name} (${cost} KP)`;
 
-    btn.addEventListener("mouseenter", e => {
+    btn.addEventListener("mouseenter", (e) => {
       tooltip.textContent = u.description;
-      tooltip.classList.remove("hidden");
+      tooltip.classList.remove("hidden");   // first un‐hide
+      tooltip.classList.add("visible");     // then fade in
       positionTooltip(e);
     });
-    btn.addEventListener("mousemove", positionTooltip);
-    btn.addEventListener("mouseleave", () => {
-      tooltip.classList.add("hidden");
+
+    btn.addEventListener("mousemove", (e) => {
+      positionTooltip(e);
     });
+
+    btn.addEventListener("mouseleave", () => {
+      tooltip.classList.remove("visible");  // fade out
+      // after fade, re‐hide to remove layout impact
+      setTimeout(() => tooltip.classList.add("hidden"), 100);
+});
 
     btn.addEventListener("click", () => {
       if (kp >= cost) {
