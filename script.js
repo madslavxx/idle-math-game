@@ -1,95 +1,173 @@
-// === SOUND EFFECTS ===
-const clickSound    = new Audio('sounds/click.wav');
-const upgradeSound  = new Audio('sounds/upgrade.wav');
-const prestigeSound = new Audio('sounds/prestige.wav');
-
-[ clickSound, upgradeSound, prestigeSound ].forEach(s => s.load());
-
-let isMuted = false;
-const muteBtn = document.getElementById("mute-btn");
-
-// Load mute setting from localStorage if it exists
-isMuted = localStorage.getItem("muteSetting") === "true";
-updateMuteButton();
-
+// === GAME STATE VARIABLES ===
 let kp = 0;
 let kpPerClick = 1;
 let kpPerSecond = 0;
 let prestiges = 0;
+let isMuted = false;
 
-function getPrestigeMultiplier() {
-  return 1 + prestiges * 0.2; // 20% bonus per prestige
+// === SOUND EFFECTS & MUTE TOGGLE ===
+const clickSound    = new Audio('sounds/click.mp3');
+const upgradeSound  = new Audio('sounds/upgrade.mp3');
+const prestigeSound = new Audio('sounds/prestige.mp3');
+clickSound.load();
+upgradeSound.load();
+prestigeSound.load();
+
+const muteBtn = document.getElementById("mute-btn");
+isMuted = localStorage.getItem("muteSetting") === "true";
+updateMuteButton();
+
+muteBtn.addEventListener("click", () => {
+  isMuted = !isMuted;
+  localStorage.setItem("muteSetting", isMuted);
+  updateMuteButton();
+});
+
+function updateMuteButton() {
+  muteBtn.textContent = isMuted ? "🔇 Sound: Off" : "🔊 Sound: On";
 }
 
-const resetOverlay = document.getElementById("reset-overlay");
-const tooltip = document.getElementById("tooltip");
-const display = document.getElementById("kp-display");
-const clickBtn = document.getElementById("click-btn");
+// === DOM REFERENCES ===
+const resetOverlay     = document.getElementById("reset-overlay");
+const tooltip          = document.getElementById("tooltip");
+const display          = document.getElementById("kp-display");
+const prestigeDisplay  = document.getElementById("prestige-display");
+const clickBtn         = document.getElementById("click-btn");
 const upgradeContainer = document.getElementById("upgrade-container");
-const prestigeDisplay = document.getElementById("prestige-display");
 
+// === PRESTIGE MULTIPLIER ===
+function getPrestigeMultiplier() {
+  return 1 + prestiges * 0.2; // +20% KP/click per prestige
+}
+
+// === DISPLAY UPDATES ===
 function updatePrestigeDisplay() {
   prestigeDisplay.textContent =
-    `Prestiges: ${prestiges} (x${getPrestigeMultiplier().toFixed(1)} KP/click boost)`;
+    `Prestiges: ${prestiges} (x${getPrestigeMultiplier().toFixed(1)} KP/click)`;
 }
 
+function updateDisplay() {
+  display.textContent = `Knowledge Points: ${Math.floor(kp)}`;
+  updatePrestigeDisplay();
+}
+
+// === TOOLTIP POSITIONER ===
+function positionTooltip(e) {
+  const offset = 15;
+  tooltip.style.left = `${e.pageX + offset}px`;
+  tooltip.style.top  = `${e.pageY + offset}px`;
+}
+
+// === UPGRADE DATA ===
 const upgrades = [
-  { name: "Loops",
-    cost: 25,       
+  {
+    name: "Loops",
+    baseCost: 25,
+    count: 0,
     effect: () => { kpPerSecond += 1; },
-    description: "Teaches repetitive tasks — +1 KP/sec", 
-    unlocked: false 
+    description: "Teaches repetitive tasks — +1 KP/sec",
+    unlocked: false
   },
   {
     name: "Recursion",
-    cost: 100,
+    baseCost: 100,
+    count: 0,
     effect: () => {
       kpPerClick = kpPerClick * 1.2 + 2;
     },
-    description: "Gives a modest recursive boost — +2 KP/click and +20%",
-    unlocked: false,
+    description: "Modest recursive boost — +2 KP/click & +20%",
+    unlocked: false
   },
-  { name: "Fibonacci", cost: 200,  effect: () => { kpPerSecond += 5; },
-    description: "Generates a recursive math sequence — +5 KP/sec", unlocked: false },
-  { name: "Exponentiation", cost: 500, effect: () => { kpPerClick += 10; },
-    description: "Exponentiation increases power rapidly — +10 KP per click", unlocked: false },
-  { name: "Sorting Algorithms", cost: 800, effect: () => { kpPerSecond += 10; },
-    description: "Improves data organization — +10 KP/sec", unlocked: false },
-  { name: "Binary Trees", cost: 1200,  effect: () => { kpPerClick += 20; },
-    description: "Hierarchical data structure — +20 KP per click", unlocked: false },
-  { name: "Graph Theory", cost: 2000,  effect: () => { kpPerSecond += 25; },
-    description: "Analyzing networks and connections — +25 KP/sec", unlocked: false },
-  { name: "Big O Notation", cost: 3000,
-    effect: () => { kpPerClick *= 1.5; kpPerSecond *= 1.5; },
-    description: "Measures algorithm efficiency — boosts both KP/sec and KP/click", unlocked: false },
-  { name: "Turing Machine", cost: 5000, effect: () => { kpPerSecond += 50; },
-    description: "Abstract machine that can simulate any algorithm — +50 KP/sec", unlocked: false },
   {
-    name: "Prestige", cost: 50000,
-    description: "Reset your progress for a significant boost to your KP gain",
+    name: "Fibonacci",
+    baseCost: 200,
+    count: 0,
+    effect: () => { kpPerSecond += 5; },
+    description: "Generates a recursive math sequence — +5 KP/sec",
+    unlocked: false
+  },
+  {
+    name: "Exponentiation",
+    baseCost: 500,
+    count: 0,
+    effect: () => { kpPerClick += 10; },
+    description: "Exponentially increases power — +10 KP/click",
+    unlocked: false
+  },
+  {
+    name: "Sorting Algorithms",
+    baseCost: 800,
+    count: 0,
+    effect: () => { kpPerSecond += 10; },
+    description: "Improves data organization — +10 KP/sec",
+    unlocked: false
+  },
+  {
+    name: "Binary Trees",
+    baseCost: 1200,
+    count: 0,
+    effect: () => { kpPerClick += 20; },
+    description: "Hierarchical data structure — +20 KP/click",
+    unlocked: false
+  },
+  {
+    name: "Graph Theory",
+    baseCost: 2000,
+    count: 0,
+    effect: () => { kpPerSecond += 25; },
+    description: "Analyzing networks — +25 KP/sec",
+    unlocked: false
+  },
+  {
+    name: "Big O Notation",
+    baseCost: 3000,
+    count: 0,
+    effect: () => {
+      kpPerClick    *= 1.5;
+      kpPerSecond   *= 1.5;
+    },
+    description: "Boosts efficiency — x1.5 KP/sec & KP/click",
+    unlocked: false
+  },
+  {
+    name: "Turing Machine",
+    baseCost: 5000,
+    count: 0,
+    effect: () => { kpPerSecond += 50; },
+    description: "Simulates any algorithm — +50 KP/sec",
+    unlocked: false
+  },
+  {
+    name: "Prestige",
+    baseCost: 50000,
+    count: 0,
     effect: () => {
       resetOverlay.classList.add("active");
       setTimeout(() => {
         if (!isMuted) {
-          clickSound.currentTime = 0;
-          clickSound.play();
+          prestigeSound.currentTime = 0;
+          prestigeSound.play();
         }
         prestiges += 1;
-        kp = 0; kpPerClick = 1; kpPerSecond = 0;
-        upgrades.forEach(u => u.unlocked = false);
+        kp = 0;
+        kpPerClick = 1;
+        kpPerSecond = 0;
+        upgrades.forEach(u => {
+          u.unlocked = false;
+          u.count = 0;
+        });
         updateDisplay();
         renderUpgrades();
         saveGame();
         resetOverlay.classList.remove("active");
       }, 800);
     },
+    description: "Reset progress for a permanent KP boost",
     unlocked: false
   }
 ];
 
-// Always show the first upgrade immediately
-upgrades[0].unlocked = true;
-
+// === CLICK HANDLER ===
 clickBtn.addEventListener("click", () => {
   if (!isMuted) {
     clickSound.currentTime = 0;
@@ -100,86 +178,80 @@ clickBtn.addEventListener("click", () => {
   renderUpgrades();
 });
 
-
-function updateDisplay() {
-  display.textContent = `Knowledge Points: ${Math.floor(kp)}`;
-  updatePrestigeDisplay();
-}
-
-function positionTooltip(e) {
-  const offset = 15;
-  tooltip.style.left = `${e.pageX + offset}px`;
-  tooltip.style.top = `${e.pageY + offset}px`;
-}
-
+// === RENDER UPGRADE BUTTONS ===
 function renderUpgrades() {
   upgradeContainer.innerHTML = "";
-  upgrades.forEach((upgrade, idx) => {
-    // Force first upgrade visible; others at 70% cost
-    if (idx === 0) upgrade.unlocked = true;
-    else if (!upgrade.unlocked && kp >= upgrade.cost * 0.7)
-      upgrade.unlocked = true;
+  upgrades.forEach((u, idx) => {
+    // always unlock Loops, others at 70% of their base cost
+    if (idx === 0) u.unlocked = true;
+    else if (!u.unlocked && kp >= u.baseCost * 0.7) u.unlocked = true;
 
-    if (upgrade.unlocked) {
-      const btn = document.createElement("button");
-      btn.className = "upgrade";
-      btn.textContent = `${upgrade.name} (${upgrade.cost} KP)`;
+    if (!u.unlocked) return;
 
-      btn.addEventListener("mouseenter", e => {
-        tooltip.textContent = upgrade.description;
-        tooltip.classList.remove("hidden");
-        positionTooltip(e);
-      });
-      btn.addEventListener("mousemove", positionTooltip);
-      btn.addEventListener("mouseleave", () => tooltip.classList.add("hidden"));
+    const cost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
+    const btn  = document.createElement("button");
+    btn.className = "upgrade";
+    btn.textContent = `${u.name} (${cost} KP)`;
 
-      btn.addEventListener("click", () => {
-        if (kp >= upgrade.cost) {
-          if (!isMuted) {
-            clickSound.currentTime = 0;
-            clickSound.play();
-          }
-          kp -= upgrade.cost;
-          upgrade.effect();
-          upgrade.unlocked = false;
-          updateDisplay();
-          renderUpgrades();
+    btn.addEventListener("mouseenter", e => {
+      tooltip.textContent = u.description;
+      tooltip.classList.remove("hidden");
+      positionTooltip(e);
+    });
+    btn.addEventListener("mousemove", positionTooltip);
+    btn.addEventListener("mouseleave", () => {
+      tooltip.classList.add("hidden");
+    });
+
+    btn.addEventListener("click", () => {
+      if (kp >= cost) {
+        if (!isMuted) {
+          upgradeSound.currentTime = 0;
+          upgradeSound.play();
         }
-      });
-      upgradeContainer.appendChild(btn);
-    }
+        kp -= cost;
+        u.effect();
+        u.count += 1;
+        updateDisplay();
+        renderUpgrades();
+      }
+    });
+
+    upgradeContainer.appendChild(btn);
   });
 }
 
-function updateMuteButton() {
-  muteBtn.textContent = isMuted ? "🔇 Sound: Off" : "🔊 Sound: On";
-}
-
-muteBtn.addEventListener("click", () => {
-  isMuted = !isMuted;
-  localStorage.setItem("muteSetting", isMuted);
-  updateMuteButton();
-});
-
+// === SAVE & LOAD ===
 function saveGame() {
   const saveData = {
-    kp, kpPerClick, kpPerSecond, prestiges,
+    kp,
+    kpPerClick,
+    kpPerSecond,
+    prestiges,
+    isMuted,
+    upgradesCount: upgrades.map(u => u.count),
     upgradesUnlocked: upgrades.map(u => u.unlocked)
   };
   localStorage.setItem("mathIdleSave", JSON.stringify(saveData));
 }
 
 function loadGame() {
-  const saveData = JSON.parse(localStorage.getItem("mathIdleSave")) || {};
-  kp = saveData.kp || 0;
-  kpPerClick = saveData.kpPerClick || 1;
-  kpPerSecond = saveData.kpPerSecond || 0;
-  prestiges = saveData.prestiges || 0;
-  if (saveData.upgradesUnlocked) {
-    upgrades.forEach((u, i) => { u.unlocked = saveData.upgradesUnlocked[i]; });
+  const data = JSON.parse(localStorage.getItem("mathIdleSave")) || {};
+  kp           = data.kp            || 0;
+  kpPerClick   = data.kpPerClick    || 1;
+  kpPerSecond  = data.kpPerSecond   || 0;
+  prestiges    = data.prestiges     || 0;
+  isMuted      = data.isMuted       || false;
+  if (data.upgradesCount) {
+    upgrades.forEach((u, i) => {
+      u.count    = data.upgradesCount[i]    || 0;
+      u.unlocked = data.upgradesUnlocked[i] || false;
+    });
   }
+  updateMuteButton();
 }
 
+// === GAME LOOP & INIT ===
 function gameLoop() {
   kp += kpPerSecond / 10;
   updateDisplay();
