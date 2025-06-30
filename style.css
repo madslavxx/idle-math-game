@@ -135,7 +135,7 @@ button:disabled {
 }
 
 /* === model STYLES (SHARED) === */
-#glossary-model, #achievements-model {
+#glossary-model, #achievements-model, #reset-confirm-model {
   position: fixed;
   top: 0;
   left: 0;
@@ -149,36 +149,44 @@ button:disabled {
   backdrop-filter: blur(5px);
 }
 
-.glossary-content, .achievements-content {
-  background: linear-gradient(135deg, #0a0a0a 60%, #0f0 100%);
+.glossary-content, .achievements-content, .model-content {
+  background-color: #0a0a0a;
   border: 2px solid #0f0;
-  box-shadow: 0 0 25px rgba(0, 255, 0, 0.4), 0 0 60px #0f05 inset;
+  box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);
   color: #0f0;
   padding: 2rem;
   width: 90%;
   max-width: 700px;
-  border-radius: 16px;
+  border-radius: 10px;
   max-height: 80vh;
   overflow-y: auto;
   position: relative;
   font-family: 'Consolas', 'Menlo', monospace;
-  transition: box-shadow 0.3s;
 }
 
-.glossary-content:hover {
-  box-shadow: 0 0 40px #0f0, 0 0 80px #0f05 inset;
+.glossary-content::-webkit-scrollbar, .achievements-content::-webkit-scrollbar, .model-content::-webkit-scrollbar {
+  width: 10px;
+}
+.glossary-content::-webkit-scrollbar-track, .achievements-content::-webkit-scrollbar-track, .model-content::-webkit-scrollbar-track {
+  background: #111;
+}
+.glossary-content::-webkit-scrollbar-thumb, .achievements-content::-webkit-scrollbar-thumb, .model-content::-webkit-scrollbar-thumb {
+  background: #0f0;
+  border-radius: 5px;
+}
+.glossary-content::-webkit-scrollbar-thumb:hover, .achievements-content::-webkit-scrollbar-thumb:hover, .model-content::-webkit-scrollbar-thumb:hover {
+  background: #0c0;
 }
 
-#glossary-model h3, #achievements-model h3 {
+#glossary-model h3, #achievements-model h3, .model-content h3 {
   margin-top: 0;
   text-align: center;
-  color: #fff;
-  text-shadow: 0 0 10px #0f0, 0 0 2px #fff;
-  font-size: 2.2rem;
+  color: #0f0;
+  text-shadow: 0 0 5px #0f0;
+  font-size: 2rem;
   border-bottom: 1px solid #0f0;
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
-  letter-spacing: 2px;
 }
 
 #glossary-close, #achievements-close {
@@ -186,30 +194,23 @@ button:disabled {
   margin: 2rem auto 0;
   padding: 0.75rem 1.5rem;
   width: fit-content;
-  background: linear-gradient(90deg, #0f0 0%, #111 100%);
+  background: transparent;
   border: 1px solid #f00;
   color: #f00;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  font-size: 1.1rem;
-  box-shadow: 0 0 8px #0f0;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  transition: all 0.2s ease-in-out;
 }
 
-#glossary-close:hover {
-  background: #f00;
-  color: #fff;
-  box-shadow: 0 0 15px #f00, 0 0 10px #0f0 inset;
+#glossary-close:hover, #achievements-close:hover {
+    background: #f00;
+    color: #111;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
 }
 
 /* === GLOSSARY SPECIFIC === */
-#glossary-list {
-  list-style: none;
-  padding-left: 0;
-  margin-bottom: 2rem;
-}
-
+#glossary-list { list-style: none; padding-left: 0; }
 #glossary-list li {
   margin-bottom: 1.5rem;
   padding: 1.2rem 1.5rem 1.2rem 2.5rem;
@@ -221,12 +222,10 @@ button:disabled {
   box-shadow: 0 2px 12px rgba(0,255,0,0.08);
   transition: background 0.2s, box-shadow 0.2s;
 }
-
 #glossary-list li:hover {
   background: rgba(0, 255, 0, 0.18);
   box-shadow: 0 4px 24px rgba(0,255,0,0.18);
 }
-
 #glossary-list li::before {
   content: '📘';
   position: absolute;
@@ -236,7 +235,6 @@ button:disabled {
   color: #0f0;
   filter: drop-shadow(0 0 2px #fff);
 }
-
 #glossary-list li strong {
   color: #fff;
   display: block;
@@ -246,80 +244,23 @@ button:disabled {
   text-shadow: 0 0 2px #0f0, 0 0 1px #fff;
 }
 
-/* === ACHIEVEMENT SPECIFIC STYLES === */
-#achievements-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-}
+/* === ACHIEVEMENT SPECIFIC === */
+#achievements-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+.achievement { border: 1px solid #444; padding: 1rem; border-radius: 5px; background-color: #1a1a1a; transition: all 0.3s ease; opacity: 0.5; }
+.achievement.unlocked { border-color: #0f0; background-color: #112111; box-shadow: 0 0 8px rgba(0, 255, 0, 0.3); opacity: 1; }
+.achievement h4 { margin: 0 0 0.5rem; color: #fff; }
+.achievement p { margin: 0; font-size: 0.9rem; color: #aaa; }
+.achievement.unlocked h4 { color: #0f0; text-shadow: 0 0 5px #0f0; }
+.achievement.unlocked p { color: #0f0; }
 
-.achievement {
-  border: 1px solid #444;
-  padding: 1rem;
-  border-radius: 5px;
-  background-color: #1a1a1a;
-  transition: all 0.3s ease;
-  opacity: 0.5;
-}
+#achievement-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #0a0a0a; color: #fff; border: 2px solid #ffd700; border-radius: 8px; padding: 1rem 1.5rem; z-index: 20000; display: flex; align-items: center; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out; transform-origin: top center; }
+#achievement-toast.hidden { transform: translateX(-50%) translateY(-150%); opacity: 0; pointer-events: none; }
+#toast-icon { font-size: 1.5rem; margin-right: 1rem; }
 
-.achievement.unlocked {
-  border-color: #0f0;
-  background-color: #112111;
-  box-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
-  opacity: 1;
-}
-
-.achievement h4 {
-  margin: 0 0 0.5rem;
-  color: #fff;
-}
-
-.achievement p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #aaa;
-}
-
-.achievement.unlocked h4 {
-  color: #0f0;
-  text-shadow: 0 0 5px #0f0;
-}
-
-.achievement.unlocked p {
-  color: #0f0;
-}
-
-#achievement-toast {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #0a0a0a;
-    color: #fff;
-    border: 2px solid #ffd700;
-    border-radius: 8px;
-    padding: 1rem 1.5rem;
-    z-index: 20000;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
-    transform-origin: top center;
-}
-
-#achievement-toast.hidden {
-    transform: translateX(-50%) translateY(-150%);
-    opacity: 0;
-    pointer-events: none;
-}
-
-#toast-icon {
-    font-size: 1.5rem;
-    margin-right: 1rem;
-}
+/* === RESET model === */
+.model-buttons { display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; }
+#reset-confirm-yes { border-color: #f00; color: #f00; }
+#reset-confirm-yes:hover { background-color: #f00; color: #111; box-shadow: 0 0 10px #f00; }
 
 /* === MISC === */
-#mute-btn, #glossary-btn, #achievements-btn {
-  margin-top: 1rem;
-  width: 100%;
-}
+#mute-btn, #glossary-btn, #achievements-btn, #reset-btn { margin-top: 1rem; width: 100%; }

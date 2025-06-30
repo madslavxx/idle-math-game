@@ -18,7 +18,8 @@
       <button id="click-btn">🧠 Solve Problem</button>
       <button id="mute-btn">🔊 Sound: On</button>
       <button id="glossary-btn">📘 Glossary</button>
-      <button id="achievements-btn">🏆 Achievements</button> <!-- Added Achievements button -->
+      <button id="achievements-btn">🏆 Achievements</button>
+      <button id="reset-btn">🔄 Reset Progress</button>
     </div>
 
     <!-- The content area displays upgrades -->
@@ -36,14 +37,14 @@
     <p id="fact-text">Loading...</p>
   </div>
 
-  <!-- The glossary model, initially hidden -->
-  <div id="glossary-model" class="hidden">
+  <!-- The glossary modal, initially hidden -->
+  <div id="glossary-modal" class="hidden">
     <div class="glossary-content">
       <h3>📘 STEM Glossary</h3>
       <ul id="glossary-list">
         <!-- Default glossary items -->
-        <li><strong>Algorithm</strong>A step-by-step set of instructions for solving a problem.</li>
-        <li><strong>Binary</strong>A base-2 number system using only 0 and 1.</li>
+        <li><strong>Algorithm</strong>: A step-by-step set of instructions for solving a problem.</li>
+        <li><strong>Binary</strong>: A base-2 number system using only 0 and 1.</li>
       </ul>
       <div id="glossary-close">✖ Close</div>
     </div>
@@ -55,12 +56,23 @@
     <span id="toast-text"></span>
   </div>
 
-  <!-- === Achievements model === -->
-  <div id="achievements-model" class="hidden">
+  <!-- === Achievements Modal === -->
+  <div id="achievements-modal" class="hidden">
     <div class="achievements-content">
       <h3>🏆 Achievements</h3>
       <div id="achievements-list"></div>
       <div id="achievements-close">✖ Close</div>
+    </div>
+  </div>
+
+  <div id="reset-confirm-modal" class="hidden">
+    <div class="modal-content">
+        <h3>Reset All Progress?</h3>
+        <p>Are you sure? This will delete all of your upgrades, knowledge points, and achievements. This action cannot be undone.</p>
+        <div class="modal-buttons">
+            <button id="reset-confirm-yes">Yes, Reset Everything</button>
+            <button id="reset-confirm-no">No, Cancel</button>
+        </div>
     </div>
   </div>
 
