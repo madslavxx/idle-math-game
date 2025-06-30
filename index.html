@@ -8,26 +8,44 @@
   <link rel="icon" type="image/png" href="favicon.png" />
 </head>
 <body>
-  <div class="game-card">
-    <header>
-      <h1>STEM Incremental</h1>
+  <div id="reset-overlay" class="hidden"></div>
+
+  <main>
+    <div class="sidebar">
+      <h2>STEM Incremental</h2>
       <p id="kp-display">Knowledge Points: 0</p>
       <p id="prestige-display">Prestiges: 0</p>
-      <div class="controls">
-        <button id="click-btn">Solve Problem</button>
-        <button id="mute-btn">🔊 Sound: On</button>
-      </div>
-    </header>
+      <button id="click-btn">🧠 Solve Problem</button>
+      <button id="mute-btn">🔊 Sound: On</button>
+      <button id="glossary-btn">📘 Glossary</button>
+    </div>
 
-    <section class="upgrades-section">
+    <div class="content">
       <h2>Upgrades</h2>
-      <div id="upgrade-container" class="upgrades-grid"></div>
-    </section>
+      <div id="upgrade-container"></div>
+    </div>
+  </main>
 
-    <div id="tooltip" class="hidden"></div>
+  <div id="tooltip" class="hidden"></div>
+
+  <div id="fact-card" class="hidden">
+    <span id="fact-close">✖</span>
+    <p id="fact-text">Loading...</p>
   </div>
 
-  <div id="reset-overlay" class="hidden"></div>
+  <div id="glossary-modal" class="hidden">
+    <h3>📘 STEM Glossary</h3>
+    <ul id="glossary-list">
+      <li><strong>Algorithm</strong>: A step-by-step set of instructions for solving a problem.</li>
+      <li><strong>Binary</strong>: A base-2 number system using only 0 and 1.</li>
+      <li><strong>Recursion</strong>: A function that calls itself to solve smaller instances.</li>
+      <li><strong>Big O Notation</strong>: Describes the efficiency of an algorithm.</li>
+      <li><strong>Turing Machine</strong>: A theoretical model of computation.</li>
+      <li><strong>Sorting Algorithm</strong>: An algorithm that arranges data in a particular order.</li>
+    </ul>
+    <div id="glossary-close">✖ Close</div>
+</div>
+
   <script src="script.js"></script>
 </body>
 </html>

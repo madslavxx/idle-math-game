@@ -34,6 +34,13 @@ const display          = document.getElementById("kp-display");
 const prestigeDisplay  = document.getElementById("prestige-display");
 const clickBtn         = document.getElementById("click-btn");
 const upgradeContainer = document.getElementById("upgrade-container");
+const factCard         = document.getElementById("fact-card");
+const factText         = document.getElementById("fact-text");
+const factClose        = document.getElementById("fact-close");
+const glossaryBtn      = document.getElementById("glossary-btn");
+const glossaryModal    = document.getElementById("glossary-modal");
+const glossaryClose    = document.getElementById("glossary-close");
+const glossaryList     = document.getElementById("glossary-list");
 
 // === PRESTIGE MULTIPLIER ===
 function getPrestigeMultiplier() {
@@ -42,8 +49,7 @@ function getPrestigeMultiplier() {
 
 // === DISPLAY UPDATES ===
 function updatePrestigeDisplay() {
-  prestigeDisplay.textContent =
-    `Prestiges: ${prestiges} (x${getPrestigeMultiplier().toFixed(1)} KP/click)`;
+  prestigeDisplay.textContent = `Prestiges: ${prestiges} (x${getPrestigeMultiplier().toFixed(1)} KP/click)`;
 }
 
 function updateDisplay() {
@@ -54,30 +60,47 @@ function updateDisplay() {
 // === TOOLTIP POSITIONER ===
 function positionTooltip(e) {
   const offset = 12;
-  // viewport coordinates
   let x = e.clientX + offset;
   let y = e.clientY + offset;
-
-  // un-hide to measure
   tooltip.classList.remove("hidden");
   tooltip.classList.add("visible");
-  tooltip.style.left = "0px";  // reset before measure
+  tooltip.style.left = "0px";
   tooltip.style.top = "0px";
-
-  // measure after becoming visible
   const { width, height } = tooltip.getBoundingClientRect();
-
-  // flip if going off screen
   if (x + width > window.innerWidth) {
     x = e.clientX - width - offset;
   }
   if (y + height > window.innerHeight) {
     y = e.clientY - height - offset;
   }
-
   tooltip.style.left = `${x}px`;
-  tooltip.style.top  = `${y}px`;
+  tooltip.style.top = `${y}px`;
 }
+
+// === FACTS ===
+const facts = {
+  "Loops": "Loops run code repeatedly—common in animations and data processing.",
+  "Recursion": "Recursion solves problems by breaking them into smaller, identical ones.",
+  "Fibonacci": "Fibonacci numbers appear in nature: pinecones, sunflowers, and seashells.",
+  "Exponentiation": "Exponentiation is repeated multiplication—a key in compound interest.",
+  "Sorting Algorithms": "Sorting data efficiently is vital for search and storage systems.",
+  "Binary Trees": "Binary trees are used in databases and file systems to store sorted data.",
+  "Graph Theory": "Graphs model relationships—from social networks to computer networks.",
+  "Big O Notation": "Big O describes how an algorithm’s runtime scales with input size.",
+  "Turing Machine": "A Turing Machine is a theoretical model that defines what’s computable."
+};
+
+factClose.addEventListener("click", () => {
+  factCard.classList.add("hidden");
+});
+
+glossaryBtn.addEventListener("click", () => {
+  glossaryModal.classList.remove("hidden");
+});
+
+glossaryClose.addEventListener("click", () => {
+  glossaryModal.classList.add("hidden");
+});
 
 // === UPGRADE DATA ===
 const upgrades = [
@@ -93,9 +116,7 @@ const upgrades = [
     name: "Recursion",
     baseCost: 100,
     count: 0,
-    effect: () => {
-      kpPerClick = kpPerClick * 1.2 + 2;
-    },
+    effect: () => { kpPerClick = kpPerClick * 1.2 + 2; },
     description: "Modest recursive boost — +2 KP/click & +20%",
     unlocked: false
   },
@@ -144,8 +165,8 @@ const upgrades = [
     baseCost: 3000,
     count: 0,
     effect: () => {
-      kpPerClick    *= 1.5;
-      kpPerSecond   *= 1.5;
+      kpPerClick *= 1.5;
+      kpPerSecond *= 1.5;
     },
     description: "Boosts efficiency — x1.5 KP/sec & KP/click",
     unlocked: false
@@ -188,7 +209,6 @@ const upgrades = [
   }
 ];
 
-// === CLICK HANDLER ===
 clickBtn.addEventListener("click", () => {
   if (!isMuted) {
     clickSound.currentTime = 0;
@@ -199,37 +219,49 @@ clickBtn.addEventListener("click", () => {
   renderUpgrades();
 });
 
-// === RENDER UPGRADE BUTTONS ===
+function applyUpgrade(u, cost) {
+  kp -= cost;
+  u.effect();
+  u.count += 1;
+  updateDisplay();
+  renderUpgrades();
+  if (![...glossaryList.children].some(li => li.dataset.name === u.name)) {
+    const li = document.createElement("li");
+    li.dataset.name = u.name;
+    li.innerHTML = `<strong>${u.name}:</strong> ${u.description}`;
+    glossaryList.appendChild(li);
+  }
+}
+
 function renderUpgrades() {
   upgradeContainer.innerHTML = "";
   upgrades.forEach((u, idx) => {
-    // always unlock Loops, others at 70% of their base cost
     if (idx === 0) u.unlocked = true;
     else if (!u.unlocked && kp >= u.baseCost * 0.7) u.unlocked = true;
-
     if (!u.unlocked) return;
 
+    if (u.unlocked && !u._factShown && facts[u.name]) {
+      factText.textContent = facts[u.name];
+      factCard.classList.remove("hidden");
+      u._factShown = true;
+    }
+
     const cost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
-    const btn  = document.createElement("button");
+    const btn = document.createElement("button");
     btn.className = "upgrade";
     btn.textContent = `${u.name} (${cost} KP)`;
 
     btn.addEventListener("mouseenter", (e) => {
       tooltip.textContent = u.description;
-      tooltip.classList.remove("hidden");   // first un‐hide
-      tooltip.classList.add("visible");     // then fade in
+      tooltip.classList.remove("hidden");
+      tooltip.classList.add("visible");
       positionTooltip(e);
     });
-
-    btn.addEventListener("mousemove", (e) => {
-      positionTooltip(e);
-    });
-
+    btn.addEventListener("mousemove", positionTooltip);
     btn.addEventListener("mouseleave", () => {
-      tooltip.classList.remove("visible");  // fade out
-      // after fade, re‐hide to remove layout impact
+      tooltip.classList.remove("visible");
       setTimeout(() => tooltip.classList.add("hidden"), 100);
-});
+    });
 
     btn.addEventListener("click", () => {
       if (kp >= cost) {
@@ -237,11 +269,7 @@ function renderUpgrades() {
           upgradeSound.currentTime = 0;
           upgradeSound.play();
         }
-        kp -= cost;
-        u.effect();
-        u.count += 1;
-        updateDisplay();
-        renderUpgrades();
+        applyUpgrade(u, cost);
       }
     });
 
@@ -249,7 +277,6 @@ function renderUpgrades() {
   });
 }
 
-// === SAVE & LOAD ===
 function saveGame() {
   const saveData = {
     kp,
@@ -265,21 +292,20 @@ function saveGame() {
 
 function loadGame() {
   const data = JSON.parse(localStorage.getItem("mathIdleSave")) || {};
-  kp           = data.kp            || 0;
-  kpPerClick   = data.kpPerClick    || 1;
-  kpPerSecond  = data.kpPerSecond   || 0;
-  prestiges    = data.prestiges     || 0;
-  isMuted      = data.isMuted       || false;
+  kp = data.kp || 0;
+  kpPerClick = data.kpPerClick || 1;
+  kpPerSecond = data.kpPerSecond || 0;
+  prestiges = data.prestiges || 0;
+  isMuted = data.isMuted || false;
   if (data.upgradesCount) {
     upgrades.forEach((u, i) => {
-      u.count    = data.upgradesCount[i]    || 0;
+      u.count = data.upgradesCount[i] || 0;
       u.unlocked = data.upgradesUnlocked[i] || false;
     });
   }
   updateMuteButton();
 }
 
-// === GAME LOOP & INIT ===
 function gameLoop() {
   kp += kpPerSecond / 10;
   updateDisplay();

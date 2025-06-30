@@ -1,106 +1,80 @@
-/* --- BASE & RESET --- */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* === RESET & BASE === */
 body {
-  background: #080808;
-  color: #e0ffe0;
-  font-family: 'Segoe UI', sans-serif;
-  padding: 1rem;
-  line-height: 1.4;
-}
-
-/* --- GAME CARD PANEL --- */
-.game-card {
-  background: #111;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 255, 0, 0.1);
-  padding: 2rem;
-  max-width: 800px;
-  width: 100%;
-  margin: 1rem auto;
-  text-align: left;
-  position: relative;
-  z-index: 1;
-}
-
-/* --- HEADER & CONTROLS --- */
-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  text-align: left;
-}
-
-header p {
-  margin: 0.25rem 0;
-  text-align: left;
-}
-
-.controls {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  background-color: #111;
+  color: #0f0;
+  font-size: 16px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1rem 0;
-  justify-content: flex-start;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* === SIDEBAR === */
+.sidebar {
+  width: 280px;
+  background-color: #080;
+  color: #000;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* === CONTENT === */
+.content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background: linear-gradient(to bottom, #111, #222);
+}
+
+h1, h2, p {
+  margin: 0 0 1rem 0;
 }
 
 button {
-  background: #222;
-  border: 2px solid #0f0;
-  border-radius: 8px;
-  color: #0f0;
-  cursor: pointer;
   font-size: 1rem;
-  padding: 0.6rem 1rem;
-  transition:
-    background 0.2s ease,
-    transform 0.1s ease,
-    box-shadow 0.2s ease;
+  padding: 0.6rem 1.2rem;
+  margin: 0.5rem 0;
+  background-color: #222;
+  color: #0f0;
+  border: 1px solid #0f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
 
 button:hover {
-  background: #0f0;
+  background-color: #0f0;
   color: #111;
-  box-shadow: 0 4px 12px rgba(0, 255, 0, 0.4);
-  transform: translateY(-2px);
 }
 
-button:active {
-  transform: translateY(0);
+.upgrade {
+  display: block;
+  width: 100%;
+  text-align: left;
 }
 
-/* --- UPGRADES GRID --- */
-.upgrades-section {
-  margin-top: 1.5rem;
-}
-
-.upgrades-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-/* --- TOOLTIP --- */
+/* === TOOLTIP === */
 #tooltip {
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  background: rgba(0, 0, 0, 0.85); /* darker, high contrast */
-  color: #e0ffe0; /* bright, readable text */
+  position: fixed;
+  background-color: #111;
+  color: #0f0;
   border: 1px solid #0f0;
-  border-radius: 6px;
-  padding: 0.75rem 1rem; /* larger padding */
-  font-size: 1rem; /* larger font */
-  line-height: 1.4;
-  max-width: 220px;
+  padding: 0.5rem;
+  font-size: 0.85rem;
   pointer-events: none;
-  transition: opacity 0.1s ease;
-  opacity: 0;
+  border-radius: 4px;
   z-index: 9999;
+  max-width: 250px;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
 #tooltip.visible {
@@ -111,35 +85,90 @@ button:active {
   display: none !important;
 }
 
-/* --- RESET OVERLAY --- */
+/* === RESET OVERLAY === */
 #reset-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background-color: #0f0;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.5s ease;
-  z-index: 0;
+  z-index: 1000;
+  transition: opacity 0.8s ease;
 }
 
 #reset-overlay.active {
-  opacity: 0.85;
+  opacity: 1;
 }
 
-/* --- RESPONSIVE ADJUSTMENTS --- */
-@media (max-width: 600px) {
-  .game-card {
-    padding: 1.5rem;
-  }
-  header h1 {
-    font-size: 2rem;
-  }
-  button {
-    font-size: 0.9rem;
-    padding: 0.5rem 0.8rem;
-  }
-  .upgrades-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.75rem;
-  }
+/* === FACT CARD === */
+#fact-card {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #000;
+  color: #0f0;
+  border: 1px solid #0f0;
+  padding: 1rem;
+  max-width: 300px;
+  border-radius: 8px;
+  z-index: 9000;
+  font-size: 0.9rem;
+}
+
+#fact-close {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #f00;
+}
+
+/* === GLOSSARY MODAL === */
+#glossary-modal {
+  position: fixed;
+  top: 10vh;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #111;
+  border: 2px solid #0f0;
+  color: #0f0;
+  padding: 2rem;
+  width: 80%;
+  max-width: 600px;
+  z-index: 10000;
+  border-radius: 10px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+#glossary-modal h3 {
+  margin-top: 0;
+}
+
+#glossary-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+#glossary-list li {
+  margin-bottom: 1rem;
+}
+
+#glossary-close {
+  display: block;
+  margin-top: 1rem;
+  text-align: center;
+  color: #f00;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* === MISC === */
+#mute-btn, #glossary-btn {
+  margin-top: 1rem;
+  width: 100%;
 }
