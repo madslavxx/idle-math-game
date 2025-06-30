@@ -47,12 +47,12 @@ const factCard         = document.getElementById("fact-card");
 const factText         = document.getElementById("fact-text");
 const factClose        = document.getElementById("fact-close");
 const glossaryBtn      = document.getElementById("glossary-btn");
-const glossaryModal    = document.getElementById("glossary-modal");
+const glossarymodel    = document.getElementById("glossary-model");
 const glossaryClose    = document.getElementById("glossary-close");
 const glossaryList     = document.getElementById("glossary-list");
 // ADDED: Achievement DOM references
 const achievementsBtn   = document.getElementById("achievements-btn");
-const achievementsModal = document.getElementById("achievements-modal");
+const achievementsmodel = document.getElementById("achievements-model");
 const achievementsClose = document.getElementById("achievements-close");
 const achievementsList  = document.getElementById("achievements-list");
 const achievementToast  = document.getElementById("achievement-toast");
@@ -89,7 +89,7 @@ function checkAchievements() {
             ach.unlocked = true;
             showAchievementToast(ach.name);
             // If the achievements panel is open, re-render it to show the new unlock
-            if (!achievementsModal.classList.contains('hidden')) {
+            if (!achievementsmodel.classList.contains('hidden')) {
                 renderAchievements();
             }
         }
@@ -111,11 +111,11 @@ function renderAchievements() {
 
 achievementsBtn.addEventListener("click", () => {
   renderAchievements();
-  achievementsModal.classList.remove("hidden");
+  achievementsmodel.classList.remove("hidden");
 });
 
 achievementsClose.addEventListener("click", () => {
-  achievementsModal.classList.add("hidden");
+  achievementsmodel.classList.add("hidden");
 });
 
 
@@ -163,10 +163,10 @@ const facts = {
   "Machine Learning": "Teaching computers to learn from data without being explicitly programmed."
 };
 
-// --- Event Listeners for Cards and Modals ---
+// --- Event Listeners for Cards and models ---
 factClose.addEventListener("click", () => factCard.classList.add("hidden"));
-glossaryBtn.addEventListener("click", () => glossaryModal.classList.remove("hidden"));
-glossaryClose.addEventListener("click", () => glossaryModal.classList.add("hidden"));
+glossaryBtn.addEventListener("click", () => glossarymodel.classList.remove("hidden"));
+glossaryClose.addEventListener("click", () => glossarymodel.classList.add("hidden"));
 
 // === UPGRADE DATA ===
 const upgrades = [

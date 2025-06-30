@@ -134,8 +134,8 @@ button:disabled {
   color: #f00;
 }
 
-/* === MODAL STYLES (SHARED) === */
-#glossary-modal, #achievements-modal {
+/* === model STYLES (SHARED) === */
+#glossary-model, #achievements-model {
   position: fixed;
   top: 0;
   left: 0;
@@ -169,7 +169,7 @@ button:disabled {
   box-shadow: 0 0 40px #0f0, 0 0 80px #0f05 inset;
 }
 
-#glossary-modal h3, #achievements-modal h3 {
+#glossary-model h3, #achievements-model h3 {
   margin-top: 0;
   text-align: center;
   color: #fff;
