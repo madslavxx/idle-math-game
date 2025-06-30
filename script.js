@@ -57,6 +57,7 @@ function updateDisplay() {
   updatePrestigeDisplay();
 }
 
+// === TOOLTIP POSITIONER ===
 function positionTooltip(e) {
   const offset = 12;
   const { width, height } = tooltip.getBoundingClientRect();
@@ -125,11 +126,12 @@ const upgrades = [
         kpPerClick = 1;
         kpPerSecond = 0;
         upgrades.forEach(u => {
-            if (u.name !== 'Prestige') { // Don't reset prestige count
+            if (u.name !== 'Prestige') {
                 u.unlocked = false;
                 u.count = 0;
             }
         });
+        upgradeContainer.innerHTML = '';
         updateDisplay();
         renderUpgrades();
         saveGame();
@@ -146,7 +148,6 @@ clickBtn.addEventListener("click", () => {
   }
   kp += kpPerClick * getPrestigeMultiplier();
   updateDisplay();
-  renderUpgrades(); // Check if new upgrades are affordable
 });
 
 function applyUpgrade(u, cost) {
@@ -154,7 +155,6 @@ function applyUpgrade(u, cost) {
   u.effect();
   u.count += 1;
   updateDisplay();
-  renderUpgrades();
   // Add purchased concept to the glossary if not already there
   if (![...glossaryList.children].some(li => li.dataset.name === u.name)) {
     const li = document.createElement("li");
@@ -165,55 +165,62 @@ function applyUpgrade(u, cost) {
 }
 
 function renderUpgrades() {
-  upgradeContainer.innerHTML = "";
   upgrades.forEach((u, idx) => {
-    // Unlock logic
+    // Unlock logic: an upgrade becomes visible when you have 70% of its base cost
     if (idx === 0) u.unlocked = true;
     else if (!u.unlocked && kp >= u.baseCost * 0.7) u.unlocked = true;
-    if (!u.unlocked) return;
 
-    // Show fact card when an upgrade is first unlocked
-    if (u.unlocked && !u._factShown && facts[u.name]) {
-      factText.textContent = facts[u.name];
-      factCard.classList.remove("hidden");
-      u._factShown = true;
+    let btn = document.getElementById(`upgrade-${idx}`);
+
+    // If the upgrade is unlocked but its button doesn't exist yet, create it.
+    if (u.unlocked && !btn) {
+      btn = document.createElement("button");
+      btn.id = `upgrade-${idx}`;
+      btn.className = "upgrade";
+      
+      // Add event listeners ONLY when the button is first created.
+      btn.addEventListener("mouseenter", (e) => {
+        tooltip.textContent = u.description;
+        tooltip.classList.remove("hidden");
+        positionTooltip(e);
+        tooltip.classList.add("visible");
+      });
+      btn.addEventListener("mousemove", positionTooltip);
+      btn.addEventListener("mouseleave", () => {
+        tooltip.classList.remove("visible");
+        setTimeout(() => tooltip.classList.add("hidden"), 200);
+      });
+      btn.addEventListener("click", () => {
+        // Recalculate cost on click to ensure it's current
+        const currentCost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
+        if (kp >= currentCost) {
+          if (!isMuted) {
+            upgradeSound.currentTime = 0;
+            upgradeSound.play().catch(e => console.error("Audio play failed:", e));
+          }
+          applyUpgrade(u, currentCost);
+        }
+      });
+      
+      upgradeContainer.appendChild(btn);
+
+      // Show fact card only when an upgrade is first unlocked
+      if (u.unlocked && !u._factShown && facts[u.name]) {
+        factText.textContent = facts[u.name];
+        factCard.classList.remove("hidden");
+        u._factShown = true;
+      }
     }
 
-    const cost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
-    const btn = document.createElement("button");
-    btn.className = "upgrade";
-    btn.disabled = kp < cost; // Disable button if player can't afford it
-    btn.textContent = `${u.name} (${cost} KP)`;
-
-    // === BUG FIX: Correctly implemented tooltip event listeners ===
-    btn.addEventListener("mouseenter", (e) => {
-      tooltip.textContent = u.description;
-      tooltip.classList.remove("hidden"); // Makes element available in DOM for measurement
-      positionTooltip(e); // Position it correctly
-      tooltip.classList.add("visible");   // Fade it in
-    });
-
-    btn.addEventListener("mousemove", positionTooltip); // Keep it with the mouse
-
-    btn.addEventListener("mouseleave", () => {
-      tooltip.classList.remove("visible"); // Fade it out
-      // Hide with display:none *after* the CSS opacity transition finishes
-      setTimeout(() => tooltip.classList.add("hidden"), 200);
-    });
-
-    btn.addEventListener("click", () => {
-      if (kp >= cost) {
-        if (!isMuted) {
-          upgradeSound.currentTime = 0;
-          upgradeSound.play().catch(e => console.error("Audio play failed:", e));
-        }
-        applyUpgrade(u, cost);
-      }
-    });
-
-    upgradeContainer.appendChild(btn);
+    // If the button exists (either just created or already there), update its state.
+    if (btn) {
+      const cost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
+      btn.disabled = kp < cost;
+      btn.textContent = `${u.name} (${cost} KP)`;
+    }
   });
 }
+
 
 // === SAVE & LOAD ===
 function saveGame() {
@@ -252,12 +259,13 @@ function loadGame() {
 function gameLoop() {
   kp += kpPerSecond / 10; // Grant passive KP 10 times per second
   updateDisplay();
-  renderUpgrades(); // Continuously check button states (affordable/not)
+  renderUpgrades(); // Continuously check button states (affordable/not) and unlock new ones
 }
 
 // --- INITIALIZE GAME ---
 loadGame();
 updateDisplay();
+// Initial render of any buttons from a saved state
 renderUpgrades();
 setInterval(gameLoop, 100);
 setInterval(saveGame, 5000); // Save every 5 seconds
