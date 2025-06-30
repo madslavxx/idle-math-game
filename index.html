@@ -18,6 +18,7 @@
       <button id="click-btn">🧠 Solve Problem</button>
       <button id="mute-btn">🔊 Sound: On</button>
       <button id="glossary-btn">📘 Glossary</button>
+      <button id="achievements-btn">🏆 Achievements</button> <!-- Added Achievements button -->
     </div>
 
     <!-- The content area displays upgrades -->
@@ -45,6 +46,21 @@
         <li><strong>Binary</strong>: A base-2 number system using only 0 and 1.</li>
       </ul>
       <div id="glossary-close">✖ Close</div>
+    </div>
+  </div>
+
+  <!-- === Achievements Toast === -->
+  <div id="achievement-toast" class="hidden">
+    <span id="toast-icon">🏆</span>
+    <span id="toast-text"></span>
+  </div>
+
+  <!-- === Achievements Modal === -->
+  <div id="achievements-modal" class="hidden">
+    <div class="achievements-content">
+      <h3>🏆 Achievements</h3>
+      <div id="achievements-list"></div>
+      <div id="achievements-close">✖ Close</div>
     </div>
   </div>
 

@@ -5,15 +5,22 @@ let kpPerSecond = 0;
 let prestiges = 0;
 let isMuted = false;
 
+// ADDED: Game stats for achievements
+let gameStats = {
+  totalClicks: 0,
+  totalKp: 0,
+  upgradesPurchased: 0,
+};
+
 // === SOUND EFFECTS & MUTE TOGGLE ===
-// Note: Audio files are not provided, so these will result in 404 errors in the console.
-// The game logic will still work.
-const clickSound    = new Audio('sounds/click.mp3');
-const upgradeSound  = new Audio('sounds/upgrade.mp3');
-const prestigeSound = new Audio('sounds/prestige.mp3');
+const clickSound    = new Audio('sounds/click.wav');
+const upgradeSound  = new Audio('sounds/upgrade.wav');
+const prestigeSound = new Audio('sounds/prestige.wav');
+const achievementSound = new Audio('sounds/achievement.mp3'); // ADDED: Sound for achievement
 clickSound.load();
 upgradeSound.load();
 prestigeSound.load();
+achievementSound.load();
 
 const muteBtn = document.getElementById("mute-btn");
 isMuted = localStorage.getItem("muteSetting") === "true";
@@ -43,10 +50,78 @@ const glossaryBtn      = document.getElementById("glossary-btn");
 const glossaryModal    = document.getElementById("glossary-modal");
 const glossaryClose    = document.getElementById("glossary-close");
 const glossaryList     = document.getElementById("glossary-list");
+// ADDED: Achievement DOM references
+const achievementsBtn   = document.getElementById("achievements-btn");
+const achievementsModal = document.getElementById("achievements-modal");
+const achievementsClose = document.getElementById("achievements-close");
+const achievementsList  = document.getElementById("achievements-list");
+const achievementToast  = document.getElementById("achievement-toast");
+const toastText         = document.getElementById("toast-text");
+
+
+// === ACHIEVEMENT SYSTEM ===
+const achievements = [
+    { id: 'click1', name: "First Step", description: "Click the 'Solve Problem' button for the first time.", unlocked: false, check: () => gameStats.totalClicks >= 1 },
+    { id: 'click100', name: "Getting Started", description: "Click the 'Solve Problem' button 100 times.", unlocked: false, check: () => gameStats.totalClicks >= 100 },
+    { id: 'kp1k', name: "Budding Genius", description: "Earn a total of 1,000 Knowledge Points.", unlocked: false, check: () => gameStats.totalKp >= 1000 },
+    { id: 'upgrade1', name: "First Investment", description: "Purchase your first upgrade.", unlocked: false, check: () => gameStats.upgradesPurchased >= 1 },
+    { id: 'prestige1', name: "Recursive Loop", description: "Prestige for the first time.", unlocked: false, check: () => prestiges >= 1 },
+    { id: 'glossary5', name: "Curious Mind", description: "Unlock 5 items in the glossary.", unlocked: false, check: () => glossaryList.children.length >= 5 },
+    { id: 'kp1m', name: "Mastermind", description: "Earn a total of 1,000,000 Knowledge Points.", unlocked: false, check: () => gameStats.totalKp >= 1000000 },
+    { id: 'polymath', name: "Polymath", description: "Own at least one of every upgrade type (before prestige).", unlocked: false, check: () => upgrades.filter(u => u.name !== 'Prestige').every(u => u.count > 0) },
+];
+
+function showAchievementToast(name) {
+    toastText.textContent = `Achievement Unlocked: ${name}`;
+    achievementToast.classList.remove('hidden');
+    if (!isMuted) {
+        achievementSound.currentTime = 0;
+        achievementSound.play().catch(e => console.error("Audio play failed:", e));
+    }
+    setTimeout(() => {
+        achievementToast.classList.add('hidden');
+    }, 4000); // Hide after 4 seconds
+}
+
+function checkAchievements() {
+    achievements.forEach(ach => {
+        if (!ach.unlocked && ach.check()) {
+            ach.unlocked = true;
+            showAchievementToast(ach.name);
+            // If the achievements panel is open, re-render it to show the new unlock
+            if (!achievementsModal.classList.contains('hidden')) {
+                renderAchievements();
+            }
+        }
+    });
+}
+
+function renderAchievements() {
+    achievementsList.innerHTML = '';
+    achievements.forEach(ach => {
+        const achDiv = document.createElement('div');
+        achDiv.className = 'achievement';
+        if (ach.unlocked) {
+            achDiv.classList.add('unlocked');
+        }
+        achDiv.innerHTML = `<h4>${ach.name}</h4><p>${ach.description}</p>`;
+        achievementsList.appendChild(achDiv);
+    });
+}
+
+achievementsBtn.addEventListener("click", () => {
+  renderAchievements();
+  achievementsModal.classList.remove("hidden");
+});
+
+achievementsClose.addEventListener("click", () => {
+  achievementsModal.classList.add("hidden");
+});
+
 
 // === PRESTIGE MULTIPLIER ===
 function getPrestigeMultiplier() {
-  return 1 + prestiges * 0.2; // +20% KP/click per prestige
+  return 1 + prestiges * 0.2;
 }
 
 // === DISPLAY UPDATES ===
@@ -65,49 +140,33 @@ function positionTooltip(e) {
   const { width, height } = tooltip.getBoundingClientRect();
   let x = e.clientX + offset;
   let y = e.clientY + offset;
-
-  // Adjust position to prevent going off-screen
-  if (x + width > window.innerWidth) {
-    x = e.clientX - width - offset;
-  }
-  if (y + height > window.innerHeight) {
-    y = e.clientY - height - offset;
-  }
-
+  if (x + width > window.innerWidth) x = e.clientX - width - offset;
+  if (y + height > window.innerHeight) y = e.clientY - height - offset;
   tooltip.style.left = `${x}px`;
   tooltip.style.top = `${y}px`;
 }
 
 // === FACTS ===
 const facts = {
-  "Loops": ": Loops run code repeatedly—common in animations and data processing.",
-  "Recursion": ": Recursion solves problems by breaking them into smaller, identical ones.",
-  "Fibonacci": ": Fibonacci numbers appear in nature: pinecones, sunflowers, and seashells.",
-  "Exponentiation": ": Exponentiation is repeated multiplication—a key in compound interest.",
-  "Sorting Algorithms": ": Sorting data efficiently is vital for search and storage systems.",
-  "Binary Trees": ": Binary trees are used in databases and file systems to store sorted data.",
-  "Graph Theory": ": Graphs model relationships—from social networks to computer networks.",
-  "Big O Notation": ": Big O describes how an algorithm’s runtime scales with input size.",
-  "Turing Machine": ": A Turing Machine is a theoretical model that defines what’s computable.",
+  "Loops": "Loops run code repeatedly—common in animations and data processing.",
+  "Recursion": "Recursion solves problems by breaking them into smaller, identical ones.",
+  "Fibonacci": "Fibonacci numbers appear in nature: pinecones, sunflowers, and seashells.",
+  "Exponentiation": "Exponentiation is repeated multiplication—a key in compound interest.",
+  "Sorting Algorithms": "Sorting data efficiently is vital for search and storage systems.",
+  "Binary Trees": "Binary trees are used in databases and file systems to store sorted data.",
+  "Graph Theory": "Graphs model relationships—from social networks to computer networks.",
+  "Big O Notation": "Big O describes how an algorithm’s runtime scales with input size.",
+  "Turing Machine": "A Turing Machine is a theoretical model that defines what’s computable.",
   // ADDED: New facts for new upgrades
-  "Data Structures": ": Ways to organize data, like arrays or trees, for efficient use.",
-  "Cryptography": ": The art of writing or solving codes for secure communication.",
-  "Machine Learning": ": Teaching computers to learn from data without being explicitly programmed."
+  "Data Structures": "Ways to organize data, like arrays or trees, for efficient use.",
+  "Cryptography": "The art of writing or solving codes for secure communication.",
+  "Machine Learning": "Teaching computers to learn from data without being explicitly programmed."
 };
 
 // --- Event Listeners for Cards and Modals ---
-factClose.addEventListener("click", () => {
-  factCard.classList.add("hidden");
-});
-
-glossaryBtn.addEventListener("click", () => {
-  glossaryModal.classList.remove("hidden");
-});
-
-glossaryClose.addEventListener("click", () => {
-  glossaryModal.classList.add("hidden");
-});
-
+factClose.addEventListener("click", () => factCard.classList.add("hidden"));
+glossaryBtn.addEventListener("click", () => glossaryModal.classList.remove("hidden"));
+glossaryClose.addEventListener("click", () => glossaryModal.classList.add("hidden"));
 
 // === UPGRADE DATA ===
 const upgrades = [
@@ -120,32 +179,18 @@ const upgrades = [
   { name: "Graph Theory", baseCost: 2000, count: 0, effect: () => { kpPerSecond += 25; }, description: "Analyzing networks — +25 KP/sec", unlocked: false },
   { name: "Big O Notation", baseCost: 3000, count: 0, effect: () => { kpPerClick *= 1.5; kpPerSecond *= 1.5; }, description: "Boosts efficiency — x1.5 KP/sec & KP/click", unlocked: false },
   { name: "Turing Machine", baseCost: 5000, count: 0, effect: () => { kpPerSecond += 50; }, description: "Simulates any algorithm — +50 KP/sec", unlocked: false },
-  // ADDED: New upgrades to expand the glossary
   { name: "Data Structures", baseCost: 8000, count: 0, effect: () => { kpPerSecond += 80; }, description: "Organize information for faster access — +80 KP/sec", unlocked: false },
   { name: "Cryptography", baseCost: 12000, count: 0, effect: () => { kpPerClick *= 2; }, description: "Secure your knowledge, doubling its impact — x2 KP/click", unlocked: false },
   { name: "Machine Learning", baseCost: 20000, count: 0, effect: () => { kpPerSecond *= 2; }, description: "Let the knowledge generate itself — x2 KP/sec", unlocked: false },
-  // MODIFIED: Increased prestige cost
   { name: "Prestige", baseCost: 100000, count: 0, effect: () => {
       resetOverlay.classList.add("active");
       setTimeout(() => {
-        if (!isMuted) {
-          prestigeSound.currentTime = 0;
-          prestigeSound.play();
-        }
+        if (!isMuted) { prestigeSound.currentTime = 0; prestigeSound.play(); }
         prestiges += 1;
-        kp = 0;
-        kpPerClick = 1;
-        kpPerSecond = 0;
-        upgrades.forEach(u => {
-            if (u.name !== 'Prestige') {
-                u.unlocked = false;
-                u.count = 0;
-            }
-        });
+        kp = 0; kpPerClick = 1; kpPerSecond = 0;
+        upgrades.forEach(u => { if (u.name !== 'Prestige') { u.unlocked = false; u.count = 0; } });
         upgradeContainer.innerHTML = '';
-        updateDisplay();
-        renderUpgrades();
-        saveGame();
+        updateDisplay(); renderUpgrades(); saveGame();
         resetOverlay.classList.remove("active");
       }, 800);
     }, description: "Reset progress for a permanent KP boost", unlocked: false
@@ -153,11 +198,11 @@ const upgrades = [
 ];
 
 clickBtn.addEventListener("click", () => {
-  if (!isMuted) {
-    clickSound.currentTime = 0;
-    clickSound.play().catch(e => console.error("Audio play failed:", e));
-  }
-  kp += kpPerClick * getPrestigeMultiplier();
+  if (!isMuted) { clickSound.currentTime = 0; clickSound.play().catch(e => console.error("Audio play failed:", e)); }
+  const pointsGained = kpPerClick * getPrestigeMultiplier();
+  kp += pointsGained;
+  gameStats.totalKp += pointsGained; // Track total KP for achievements
+  gameStats.totalClicks++; // Track clicks for achievements
   updateDisplay();
 });
 
@@ -165,12 +210,12 @@ function applyUpgrade(u, cost) {
   kp -= cost;
   u.effect();
   u.count += 1;
+  gameStats.upgradesPurchased++; // Track upgrades for achievements
   updateDisplay();
-  // Add purchased concept to the glossary if not already there
   if (![...glossaryList.children].some(li => li.dataset.name === u.name)) {
     const li = document.createElement("li");
     li.dataset.name = u.name;
-    li.innerHTML = `<strong>${u.name}</strong>${facts[u.name] || u.description}`;
+    li.innerHTML = `<strong>${u.name}:</strong> ${facts[u.name] || u.description}`;
     glossaryList.appendChild(li);
   }
 }
@@ -179,63 +224,36 @@ function renderUpgrades() {
   upgrades.forEach((u, idx) => {
     if (idx === 0) u.unlocked = true;
     else if (!u.unlocked && kp >= u.baseCost * 0.7) u.unlocked = true;
-
     let btn = document.getElementById(`upgrade-${idx}`);
-
     if (u.unlocked && !btn) {
       btn = document.createElement("button");
       btn.id = `upgrade-${idx}`;
       btn.className = "upgrade";
-      
-      btn.addEventListener("mouseenter", (e) => {
-        tooltip.textContent = u.description;
-        tooltip.classList.remove("hidden");
-        positionTooltip(e);
-        tooltip.classList.add("visible");
-      });
+      btn.addEventListener("mouseenter", (e) => { tooltip.textContent = u.description; tooltip.classList.remove("hidden"); positionTooltip(e); tooltip.classList.add("visible"); });
       btn.addEventListener("mousemove", positionTooltip);
-      btn.addEventListener("mouseleave", () => {
-        tooltip.classList.remove("visible");
-        setTimeout(() => tooltip.classList.add("hidden"), 200);
-      });
+      btn.addEventListener("mouseleave", () => { tooltip.classList.remove("visible"); setTimeout(() => tooltip.classList.add("hidden"), 200); });
       btn.addEventListener("click", () => {
         const currentCost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
         if (kp >= currentCost) {
-          if (!isMuted) {
-            upgradeSound.currentTime = 0;
-            upgradeSound.play().catch(e => console.error("Audio play failed:", e));
-          }
+          if (!isMuted) { upgradeSound.currentTime = 0; upgradeSound.play().catch(e => console.error("Audio play failed:", e)); }
           applyUpgrade(u, currentCost);
         }
       });
-      
       upgradeContainer.appendChild(btn);
-
-      if (u.unlocked && !u._factShown && facts[u.name]) {
-        factText.textContent = facts[u.name];
-        factCard.classList.remove("hidden");
-        u._factShown = true;
-      }
+      if (u.unlocked && !u._factShown && facts[u.name]) { factText.textContent = facts[u.name]; factCard.classList.remove("hidden"); u._factShown = true; }
     }
-
-    if (btn) {
-      const cost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
-      btn.disabled = kp < cost;
-      btn.textContent = `${u.name} (${cost} KP)`;
-    }
+    if (btn) { const cost = Math.floor(u.baseCost * Math.pow(1.15, u.count)); btn.disabled = kp < cost; btn.textContent = `${u.name} (${cost} KP)`; }
   });
 }
-
 
 // === SAVE & LOAD ===
 function saveGame() {
   const saveData = {
-    kp,
-    kpPerClick,
-    kpPerSecond,
-    prestiges,
-    isMuted,
-    upgrades: upgrades.map(u => ({ count: u.count, unlocked: u.unlocked, _factShown: u._factShown }))
+    kp, kpPerClick, kpPerSecond, prestiges, isMuted,
+    upgrades: upgrades.map(u => ({ count: u.count, unlocked: u.unlocked, _factShown: u._factShown })),
+    achievements: achievements.map(a => a.unlocked), // Save achievement state
+    gameStats, // Save game stats
+    glossary: glossaryList.innerHTML // Save glossary content
   };
   localStorage.setItem("mathIdleSave", JSON.stringify(saveData));
 }
@@ -243,31 +261,22 @@ function saveGame() {
 function loadGame() {
   const data = JSON.parse(localStorage.getItem("mathIdleSave"));
   if (!data) return;
-
-  kp = data.kp || 0;
-  kpPerClick = data.kpPerClick || 1;
-  kpPerSecond = data.kpPerSecond || 0;
-  prestiges = data.prestiges || 0;
-  isMuted = data.isMuted || false;
-  if (data.upgrades) {
-    upgrades.forEach((u, i) => {
-      const savedUpgrade = data.upgrades[i];
-      if (savedUpgrade) {
-        u.count = savedUpgrade.count || 0;
-        u.unlocked = savedUpgrade.unlocked || false;
-        u._factShown = savedUpgrade._factShown || false;
-      }
-    });
-  }
+  kp = data.kp || 0; kpPerClick = data.kpPerClick || 1; kpPerSecond = data.kpPerSecond || 0; prestiges = data.prestiges || 0; isMuted = data.isMuted || false;
+  gameStats = data.gameStats || { totalClicks: 0, totalKp: 0, upgradesPurchased: 0 };
+  if (data.upgrades) { upgrades.forEach((u, i) => { const savedUpgrade = data.upgrades[i]; if (savedUpgrade) { u.count = savedUpgrade.count || 0; u.unlocked = savedUpgrade.unlocked || false; u._factShown = savedUpgrade._factShown || false; } }); }
+  if (data.achievements) { achievements.forEach((a, i) => { a.unlocked = data.achievements[i] || false; }); }
+  if (data.glossary) { glossaryList.innerHTML = data.glossary; }
   updateMuteButton();
 }
 
-
 // === GAME LOOP ===
 function gameLoop() {
-  kp += kpPerSecond / 10;
+  const passiveKp = kpPerSecond / 10;
+  kp += passiveKp;
+  gameStats.totalKp += passiveKp; // Track passive KP for achievements
   updateDisplay();
   renderUpgrades();
+  checkAchievements(); // Check for new achievements every tick
 }
 
 // --- INITIALIZE GAME ---
@@ -276,3 +285,4 @@ updateDisplay();
 renderUpgrades();
 setInterval(gameLoop, 100);
 setInterval(saveGame, 5000);
+window.addEventListener('beforeunload', saveGame); // Save on page unload
