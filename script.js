@@ -6,6 +6,8 @@ let prestiges = 0;
 let isMuted = false;
 
 // === SOUND EFFECTS & MUTE TOGGLE ===
+// Note: Audio files are not provided, so these will result in 404 errors in the console.
+// The game logic will still work.
 const clickSound    = new Audio('sounds/click.mp3');
 const upgradeSound  = new Audio('sounds/upgrade.mp3');
 const prestigeSound = new Audio('sounds/prestige.mp3');
@@ -78,15 +80,19 @@ function positionTooltip(e) {
 
 // === FACTS ===
 const facts = {
-  "Loops": "Loops run code repeatedly—common in animations and data processing.",
-  "Recursion": "Recursion solves problems by breaking them into smaller, identical ones.",
-  "Fibonacci": "Fibonacci numbers appear in nature: pinecones, sunflowers, and seashells.",
-  "Exponentiation": "Exponentiation is repeated multiplication—a key in compound interest.",
-  "Sorting Algorithms": "Sorting data efficiently is vital for search and storage systems.",
-  "Binary Trees": "Binary trees are used in databases and file systems to store sorted data.",
-  "Graph Theory": "Graphs model relationships—from social networks to computer networks.",
-  "Big O Notation": "Big O describes how an algorithm’s runtime scales with input size.",
-  "Turing Machine": "A Turing Machine is a theoretical model that defines what’s computable."
+  "Loops": ": Loops run code repeatedly—common in animations and data processing.",
+  "Recursion": ": Recursion solves problems by breaking them into smaller, identical ones.",
+  "Fibonacci": ": Fibonacci numbers appear in nature: pinecones, sunflowers, and seashells.",
+  "Exponentiation": ": Exponentiation is repeated multiplication—a key in compound interest.",
+  "Sorting Algorithms": ": Sorting data efficiently is vital for search and storage systems.",
+  "Binary Trees": ": Binary trees are used in databases and file systems to store sorted data.",
+  "Graph Theory": ": Graphs model relationships—from social networks to computer networks.",
+  "Big O Notation": ": Big O describes how an algorithm’s runtime scales with input size.",
+  "Turing Machine": ": A Turing Machine is a theoretical model that defines what’s computable.",
+  // ADDED: New facts for new upgrades
+  "Data Structures": ": Ways to organize data, like arrays or trees, for efficient use.",
+  "Cryptography": ": The art of writing or solving codes for secure communication.",
+  "Machine Learning": ": Teaching computers to learn from data without being explicitly programmed."
 };
 
 // --- Event Listeners for Cards and Modals ---
@@ -114,7 +120,12 @@ const upgrades = [
   { name: "Graph Theory", baseCost: 2000, count: 0, effect: () => { kpPerSecond += 25; }, description: "Analyzing networks — +25 KP/sec", unlocked: false },
   { name: "Big O Notation", baseCost: 3000, count: 0, effect: () => { kpPerClick *= 1.5; kpPerSecond *= 1.5; }, description: "Boosts efficiency — x1.5 KP/sec & KP/click", unlocked: false },
   { name: "Turing Machine", baseCost: 5000, count: 0, effect: () => { kpPerSecond += 50; }, description: "Simulates any algorithm — +50 KP/sec", unlocked: false },
-  { name: "Prestige", baseCost: 50000, count: 0, effect: () => {
+  // ADDED: New upgrades to expand the glossary
+  { name: "Data Structures", baseCost: 8000, count: 0, effect: () => { kpPerSecond += 80; }, description: "Organize information for faster access — +80 KP/sec", unlocked: false },
+  { name: "Cryptography", baseCost: 12000, count: 0, effect: () => { kpPerClick *= 2; }, description: "Secure your knowledge, doubling its impact — x2 KP/click", unlocked: false },
+  { name: "Machine Learning", baseCost: 20000, count: 0, effect: () => { kpPerSecond *= 2; }, description: "Let the knowledge generate itself — x2 KP/sec", unlocked: false },
+  // MODIFIED: Increased prestige cost
+  { name: "Prestige", baseCost: 100000, count: 0, effect: () => {
       resetOverlay.classList.add("active");
       setTimeout(() => {
         if (!isMuted) {
@@ -159,26 +170,23 @@ function applyUpgrade(u, cost) {
   if (![...glossaryList.children].some(li => li.dataset.name === u.name)) {
     const li = document.createElement("li");
     li.dataset.name = u.name;
-    li.innerHTML = `<strong>${u.name}:</strong> ${facts[u.name] || u.description}`;
+    li.innerHTML = `<strong>${u.name}</strong>${facts[u.name] || u.description}`;
     glossaryList.appendChild(li);
   }
 }
 
 function renderUpgrades() {
   upgrades.forEach((u, idx) => {
-    // Unlock logic: an upgrade becomes visible when you have 70% of its base cost
     if (idx === 0) u.unlocked = true;
     else if (!u.unlocked && kp >= u.baseCost * 0.7) u.unlocked = true;
 
     let btn = document.getElementById(`upgrade-${idx}`);
 
-    // If the upgrade is unlocked but its button doesn't exist yet, create it.
     if (u.unlocked && !btn) {
       btn = document.createElement("button");
       btn.id = `upgrade-${idx}`;
       btn.className = "upgrade";
       
-      // Add event listeners ONLY when the button is first created.
       btn.addEventListener("mouseenter", (e) => {
         tooltip.textContent = u.description;
         tooltip.classList.remove("hidden");
@@ -191,7 +199,6 @@ function renderUpgrades() {
         setTimeout(() => tooltip.classList.add("hidden"), 200);
       });
       btn.addEventListener("click", () => {
-        // Recalculate cost on click to ensure it's current
         const currentCost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
         if (kp >= currentCost) {
           if (!isMuted) {
@@ -204,7 +211,6 @@ function renderUpgrades() {
       
       upgradeContainer.appendChild(btn);
 
-      // Show fact card only when an upgrade is first unlocked
       if (u.unlocked && !u._factShown && facts[u.name]) {
         factText.textContent = facts[u.name];
         factCard.classList.remove("hidden");
@@ -212,7 +218,6 @@ function renderUpgrades() {
       }
     }
 
-    // If the button exists (either just created or already there), update its state.
     if (btn) {
       const cost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
       btn.disabled = kp < cost;
@@ -246,9 +251,12 @@ function loadGame() {
   isMuted = data.isMuted || false;
   if (data.upgrades) {
     upgrades.forEach((u, i) => {
-      u.count = data.upgrades[i]?.count || 0;
-      u.unlocked = data.upgrades[i]?.unlocked || false;
-      u._factShown = data.upgrades[i]?._factShown || false;
+      const savedUpgrade = data.upgrades[i];
+      if (savedUpgrade) {
+        u.count = savedUpgrade.count || 0;
+        u.unlocked = savedUpgrade.unlocked || false;
+        u._factShown = savedUpgrade._factShown || false;
+      }
     });
   }
   updateMuteButton();
@@ -257,15 +265,14 @@ function loadGame() {
 
 // === GAME LOOP ===
 function gameLoop() {
-  kp += kpPerSecond / 10; // Grant passive KP 10 times per second
+  kp += kpPerSecond / 10;
   updateDisplay();
-  renderUpgrades(); // Continuously check button states (affordable/not) and unlock new ones
+  renderUpgrades();
 }
 
 // --- INITIALIZE GAME ---
 loadGame();
 updateDisplay();
-// Initial render of any buttons from a saved state
 renderUpgrades();
 setInterval(gameLoop, 100);
-setInterval(saveGame, 5000); // Save every 5 seconds
+setInterval(saveGame, 5000);
