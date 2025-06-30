@@ -57,22 +57,20 @@ function updateDisplay() {
   updatePrestigeDisplay();
 }
 
-// === TOOLTIP POSITIONER ===
 function positionTooltip(e) {
   const offset = 12;
+  const { width, height } = tooltip.getBoundingClientRect();
   let x = e.clientX + offset;
   let y = e.clientY + offset;
-  tooltip.classList.remove("hidden");
-  tooltip.classList.add("visible");
-  tooltip.style.left = "0px";
-  tooltip.style.top = "0px";
-  const { width, height } = tooltip.getBoundingClientRect();
+
+  // Adjust position to prevent going off-screen
   if (x + width > window.innerWidth) {
     x = e.clientX - width - offset;
   }
   if (y + height > window.innerHeight) {
     y = e.clientY - height - offset;
   }
+
   tooltip.style.left = `${x}px`;
   tooltip.style.top = `${y}px`;
 }
@@ -90,6 +88,7 @@ const facts = {
   "Turing Machine": "A Turing Machine is a theoretical model that defines what’s computable."
 };
 
+// --- Event Listeners for Cards and Modals ---
 factClose.addEventListener("click", () => {
   factCard.classList.add("hidden");
 });
@@ -102,88 +101,19 @@ glossaryClose.addEventListener("click", () => {
   glossaryModal.classList.add("hidden");
 });
 
+
 // === UPGRADE DATA ===
 const upgrades = [
-  {
-    name: "Loops",
-    baseCost: 25,
-    count: 0,
-    effect: () => { kpPerSecond += 1; },
-    description: "Teaches repetitive tasks — +1 KP/sec",
-    unlocked: false
-  },
-  {
-    name: "Recursion",
-    baseCost: 100,
-    count: 0,
-    effect: () => { kpPerClick = kpPerClick * 1.2 + 2; },
-    description: "Modest recursive boost — +2 KP/click & +20%",
-    unlocked: false
-  },
-  {
-    name: "Fibonacci",
-    baseCost: 200,
-    count: 0,
-    effect: () => { kpPerSecond += 5; },
-    description: "Generates a recursive math sequence — +5 KP/sec",
-    unlocked: false
-  },
-  {
-    name: "Exponentiation",
-    baseCost: 500,
-    count: 0,
-    effect: () => { kpPerClick += 10; },
-    description: "Exponentially increases power — +10 KP/click",
-    unlocked: false
-  },
-  {
-    name: "Sorting Algorithms",
-    baseCost: 800,
-    count: 0,
-    effect: () => { kpPerSecond += 10; },
-    description: "Improves data organization — +10 KP/sec",
-    unlocked: false
-  },
-  {
-    name: "Binary Trees",
-    baseCost: 1200,
-    count: 0,
-    effect: () => { kpPerClick += 20; },
-    description: "Hierarchical data structure — +20 KP/click",
-    unlocked: false
-  },
-  {
-    name: "Graph Theory",
-    baseCost: 2000,
-    count: 0,
-    effect: () => { kpPerSecond += 25; },
-    description: "Analyzing networks — +25 KP/sec",
-    unlocked: false
-  },
-  {
-    name: "Big O Notation",
-    baseCost: 3000,
-    count: 0,
-    effect: () => {
-      kpPerClick *= 1.5;
-      kpPerSecond *= 1.5;
-    },
-    description: "Boosts efficiency — x1.5 KP/sec & KP/click",
-    unlocked: false
-  },
-  {
-    name: "Turing Machine",
-    baseCost: 5000,
-    count: 0,
-    effect: () => { kpPerSecond += 50; },
-    description: "Simulates any algorithm — +50 KP/sec",
-    unlocked: false
-  },
-  {
-    name: "Prestige",
-    baseCost: 50000,
-    count: 0,
-    effect: () => {
+  { name: "Loops", baseCost: 25, count: 0, effect: () => { kpPerSecond += 1; }, description: "Teaches repetitive tasks — +1 KP/sec", unlocked: false },
+  { name: "Recursion", baseCost: 100, count: 0, effect: () => { kpPerClick = kpPerClick * 1.2 + 2; }, description: "Modest recursive boost — +2 KP/click & +20%", unlocked: false },
+  { name: "Fibonacci", baseCost: 200, count: 0, effect: () => { kpPerSecond += 5; }, description: "Generates a recursive math sequence — +5 KP/sec", unlocked: false },
+  { name: "Exponentiation", baseCost: 500, count: 0, effect: () => { kpPerClick += 10; }, description: "Exponentially increases power — +10 KP/click", unlocked: false },
+  { name: "Sorting Algorithms", baseCost: 800, count: 0, effect: () => { kpPerSecond += 10; }, description: "Improves data organization — +10 KP/sec", unlocked: false },
+  { name: "Binary Trees", baseCost: 1200, count: 0, effect: () => { kpPerClick += 20; }, description: "Hierarchical data structure — +20 KP/click", unlocked: false },
+  { name: "Graph Theory", baseCost: 2000, count: 0, effect: () => { kpPerSecond += 25; }, description: "Analyzing networks — +25 KP/sec", unlocked: false },
+  { name: "Big O Notation", baseCost: 3000, count: 0, effect: () => { kpPerClick *= 1.5; kpPerSecond *= 1.5; }, description: "Boosts efficiency — x1.5 KP/sec & KP/click", unlocked: false },
+  { name: "Turing Machine", baseCost: 5000, count: 0, effect: () => { kpPerSecond += 50; }, description: "Simulates any algorithm — +50 KP/sec", unlocked: false },
+  { name: "Prestige", baseCost: 50000, count: 0, effect: () => {
       resetOverlay.classList.add("active");
       setTimeout(() => {
         if (!isMuted) {
@@ -195,28 +125,28 @@ const upgrades = [
         kpPerClick = 1;
         kpPerSecond = 0;
         upgrades.forEach(u => {
-          u.unlocked = false;
-          u.count = 0;
+            if (u.name !== 'Prestige') { // Don't reset prestige count
+                u.unlocked = false;
+                u.count = 0;
+            }
         });
         updateDisplay();
         renderUpgrades();
         saveGame();
         resetOverlay.classList.remove("active");
       }, 800);
-    },
-    description: "Reset progress for a permanent KP boost",
-    unlocked: false
+    }, description: "Reset progress for a permanent KP boost", unlocked: false
   }
 ];
 
 clickBtn.addEventListener("click", () => {
   if (!isMuted) {
     clickSound.currentTime = 0;
-    clickSound.play();
+    clickSound.play().catch(e => console.error("Audio play failed:", e));
   }
   kp += kpPerClick * getPrestigeMultiplier();
   updateDisplay();
-  renderUpgrades();
+  renderUpgrades(); // Check if new upgrades are affordable
 });
 
 function applyUpgrade(u, cost) {
@@ -225,10 +155,11 @@ function applyUpgrade(u, cost) {
   u.count += 1;
   updateDisplay();
   renderUpgrades();
+  // Add purchased concept to the glossary if not already there
   if (![...glossaryList.children].some(li => li.dataset.name === u.name)) {
     const li = document.createElement("li");
     li.dataset.name = u.name;
-    li.innerHTML = `<strong>${u.name}:</strong> ${u.description}`;
+    li.innerHTML = `<strong>${u.name}:</strong> ${facts[u.name] || u.description}`;
     glossaryList.appendChild(li);
   }
 }
@@ -236,10 +167,12 @@ function applyUpgrade(u, cost) {
 function renderUpgrades() {
   upgradeContainer.innerHTML = "";
   upgrades.forEach((u, idx) => {
+    // Unlock logic
     if (idx === 0) u.unlocked = true;
     else if (!u.unlocked && kp >= u.baseCost * 0.7) u.unlocked = true;
     if (!u.unlocked) return;
 
+    // Show fact card when an upgrade is first unlocked
     if (u.unlocked && !u._factShown && facts[u.name]) {
       factText.textContent = facts[u.name];
       factCard.classList.remove("hidden");
@@ -249,25 +182,30 @@ function renderUpgrades() {
     const cost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
     const btn = document.createElement("button");
     btn.className = "upgrade";
+    btn.disabled = kp < cost; // Disable button if player can't afford it
     btn.textContent = `${u.name} (${cost} KP)`;
 
+    // === BUG FIX: Correctly implemented tooltip event listeners ===
     btn.addEventListener("mouseenter", (e) => {
       tooltip.textContent = u.description;
-      tooltip.classList.remove("hidden");
-      tooltip.classList.add("visible");
-      positionTooltip(e);
+      tooltip.classList.remove("hidden"); // Makes element available in DOM for measurement
+      positionTooltip(e); // Position it correctly
+      tooltip.classList.add("visible");   // Fade it in
     });
-    btn.addEventListener("mousemove", positionTooltip);
+
+    btn.addEventListener("mousemove", positionTooltip); // Keep it with the mouse
+
     btn.addEventListener("mouseleave", () => {
-      tooltip.classList.remove("visible");
-      setTimeout(() => tooltip.classList.add("hidden"), 100);
+      tooltip.classList.remove("visible"); // Fade it out
+      // Hide with display:none *after* the CSS opacity transition finishes
+      setTimeout(() => tooltip.classList.add("hidden"), 200);
     });
 
     btn.addEventListener("click", () => {
       if (kp >= cost) {
         if (!isMuted) {
           upgradeSound.currentTime = 0;
-          upgradeSound.play();
+          upgradeSound.play().catch(e => console.error("Audio play failed:", e));
         }
         applyUpgrade(u, cost);
       }
@@ -277,6 +215,7 @@ function renderUpgrades() {
   });
 }
 
+// === SAVE & LOAD ===
 function saveGame() {
   const saveData = {
     kp,
@@ -284,35 +223,41 @@ function saveGame() {
     kpPerSecond,
     prestiges,
     isMuted,
-    upgradesCount: upgrades.map(u => u.count),
-    upgradesUnlocked: upgrades.map(u => u.unlocked)
+    upgrades: upgrades.map(u => ({ count: u.count, unlocked: u.unlocked, _factShown: u._factShown }))
   };
   localStorage.setItem("mathIdleSave", JSON.stringify(saveData));
 }
 
 function loadGame() {
-  const data = JSON.parse(localStorage.getItem("mathIdleSave")) || {};
+  const data = JSON.parse(localStorage.getItem("mathIdleSave"));
+  if (!data) return;
+
   kp = data.kp || 0;
   kpPerClick = data.kpPerClick || 1;
   kpPerSecond = data.kpPerSecond || 0;
   prestiges = data.prestiges || 0;
   isMuted = data.isMuted || false;
-  if (data.upgradesCount) {
+  if (data.upgrades) {
     upgrades.forEach((u, i) => {
-      u.count = data.upgradesCount[i] || 0;
-      u.unlocked = data.upgradesUnlocked[i] || false;
+      u.count = data.upgrades[i]?.count || 0;
+      u.unlocked = data.upgrades[i]?.unlocked || false;
+      u._factShown = data.upgrades[i]?._factShown || false;
     });
   }
   updateMuteButton();
 }
 
+
+// === GAME LOOP ===
 function gameLoop() {
-  kp += kpPerSecond / 10;
+  kp += kpPerSecond / 10; // Grant passive KP 10 times per second
   updateDisplay();
-  saveGame();
+  renderUpgrades(); // Continuously check button states (affordable/not)
 }
 
+// --- INITIALIZE GAME ---
 loadGame();
 updateDisplay();
 renderUpgrades();
 setInterval(gameLoop, 100);
+setInterval(saveGame, 5000); // Save every 5 seconds

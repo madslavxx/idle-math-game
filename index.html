@@ -8,9 +8,9 @@
   <link rel="icon" type="image/png" href="favicon.png" />
 </head>
 <body>
-  <div id="reset-overlay" class="hidden"></div>
-
+  <!-- This is the main container for your game -->
   <main>
+    <!-- The sidebar contains player stats and core action buttons -->
     <div class="sidebar">
       <h2>STEM Incremental</h2>
       <p id="kp-display">Knowledge Points: 0</p>
@@ -20,31 +20,37 @@
       <button id="glossary-btn">📘 Glossary</button>
     </div>
 
+    <!-- The content area displays upgrades -->
     <div class="content">
       <h2>Upgrades</h2>
       <div id="upgrade-container"></div>
     </div>
   </main>
 
+  <!-- Hidden elements that are shown based on game events -->
+  <div id="reset-overlay" class="hidden"></div>
   <div id="tooltip" class="hidden"></div>
-
   <div id="fact-card" class="hidden">
     <span id="fact-close">✖</span>
     <p id="fact-text">Loading...</p>
   </div>
 
+  <!-- The glossary modal, initially hidden -->
   <div id="glossary-modal" class="hidden">
-    <h3>📘 STEM Glossary</h3>
-    <ul id="glossary-list">
-      <li><strong>Algorithm</strong>: A step-by-step set of instructions for solving a problem.</li>
-      <li><strong>Binary</strong>: A base-2 number system using only 0 and 1.</li>
-      <li><strong>Recursion</strong>: A function that calls itself to solve smaller instances.</li>
-      <li><strong>Big O Notation</strong>: Describes the efficiency of an algorithm.</li>
-      <li><strong>Turing Machine</strong>: A theoretical model of computation.</li>
-      <li><strong>Sorting Algorithm</strong>: An algorithm that arranges data in a particular order.</li>
-    </ul>
-    <div id="glossary-close">✖ Close</div>
-</div>
+    <div class="glossary-content">
+      <h3>📘 STEM Glossary</h3>
+      <ul id="glossary-list">
+        <!-- Default glossary items -->
+        <li><strong>Algorithm</strong>: A step-by-step set of instructions for solving a problem.</li>
+        <li><strong>Binary</strong>: A base-2 number system using only 0 and 1.</li>
+        <li><strong>Recursion</strong>: A function that calls itself to solve smaller instances.</li>
+        <li><strong>Big O Notation</strong>: Describes the efficiency of an algorithm.</li>
+        <li><strong>Turing Machine</strong>: A theoretical model of computation.</li>
+        <li><strong>Sorting Algorithm</strong>: An algorithm that arranges data in a particular order.</li>
+      </ul>
+      <div id="glossary-close">✖ Close</div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
