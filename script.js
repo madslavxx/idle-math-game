@@ -3,6 +3,7 @@ const glossaryModal = new bootstrap.Modal(document.getElementById('glossary-moda
 const achievementsModal = new bootstrap.Modal(document.getElementById('achievements-modal'));
 const resetConfirmModal = new bootstrap.Modal(document.getElementById('reset-confirm-modal'));
 const achievementToast = new bootstrap.Toast(document.getElementById('achievement-toast'));
+const quizModal = new bootstrap.Modal(document.getElementById('quiz-modal'));
 
 // === GAME STATE VARIABLES ===
 let kp = 0;
@@ -42,6 +43,45 @@ const toastText = document.getElementById("toast-text");
 const resetBtn = document.getElementById("reset-btn");
 const resetConfirmYes = document.getElementById("reset-confirm-yes");
 
+// === QUIZ DATA ===
+const quizData = [
+    {
+        id: "Loops",
+        question: "Which of the following best describes a 'for' loop?",
+        options: [
+            "A way to store a single value.",
+            "A method to run a block of code a specific number of times.",
+            "A conditional statement that runs code once if true.",
+            "A function that calls itself."
+        ],
+        correctAnswer: "A method to run a block of code a specific number of times.",
+        asked: false, // We'll use this to make sure we only ask once
+    },
+    {
+        id: "Recursion",
+        question: "What is the primary characteristic of a recursive function?",
+        options: [
+            "It uses a loop to iterate.",
+            "It must return a number.",
+            "It calls itself to solve a smaller version of the problem.",
+            "It can only be written in Python."
+        ],
+        correctAnswer: "It calls itself to solve a smaller version of the problem.",
+        asked: false,
+    },
+    {
+        id: "Fibonacci",
+        question: "The Fibonacci sequence is defined by F(n) = F(n-1) + F(n-2). What are the first three numbers in the sequence (starting from 1)?",
+        options: [
+            "1, 2, 3",
+            "0, 1, 2",
+            "1, 1, 2",
+            "1, 3, 5"
+        ],
+        correctAnswer: "1, 1, 2",
+        asked: false,
+    }
+];
 // === ACHIEVEMENT SYSTEM ===
 const achievements = [
     { id: 'click1', name: "First Step", description: "Click the 'Solve Problem' button for the first time.", unlocked: false, check: () => gameStats.totalClicks >= 1 },
@@ -104,7 +144,55 @@ resetConfirmYes.addEventListener('click', () => {
     window.location.reload();
 });
 
+function showQuiz(upgradeId) {
+    const questionData = quizData.find(q => q.id === upgradeId);
+    // Only show the quiz if a question exists and it hasn't been asked yet
+    if (!questionData || questionData.asked) {
+        return;
+    }
+    questionData.asked = true; // Mark as asked immediately
 
+    const questionTextEl = document.getElementById('quiz-question-text');
+    const optionsContainerEl = document.getElementById('quiz-options-container');
+    const feedbackTextEl = document.getElementById('quiz-feedback-text');
+    const modalFooter = document.querySelector('#quiz-modal .modal-footer');
+
+    // Reset modal state
+    questionTextEl.textContent = questionData.question;
+    optionsContainerEl.innerHTML = '';
+    feedbackTextEl.style.display = 'none';
+    modalFooter.style.display = 'none';
+    optionsContainerEl.style.display = 'block';
+
+    // Create a button for each answer option
+    questionData.options.forEach(option => {
+        const button = document.createElement('button');
+        button.className = 'btn btn-outline-light';
+        button.textContent = option;
+        button.onclick = () => handleAnswer(option);
+        optionsContainerEl.appendChild(button);
+    });
+
+    // Function to handle the user's answer
+    const handleAnswer = (selectedAnswer) => {
+        optionsContainerEl.style.display = 'none'; // Hide answer buttons
+        feedbackTextEl.style.display = 'block';   // Show feedback area
+        modalFooter.style.display = 'block';      // Show the 'Continue' button
+
+        if (selectedAnswer === questionData.correctAnswer) {
+            const reward = Math.floor(kp * 0.1) + 100; // Reward: 10% of current KP + 100
+            kp += reward;
+            gameStats.totalKp += reward;
+            feedbackTextEl.innerHTML = `<strong class="text-success">Correct!</strong><br>You earned a bonus of ${reward} KP!`;
+            if (!isMuted) { upgradeSound.play(); }
+        } else {
+            feedbackTextEl.innerHTML = `<strong class="text-danger">Not quite.</strong><br>The correct answer was: "${questionData.correctAnswer}"`;
+        }
+        updateDisplay();
+    };
+
+    quizModal.show();
+}
 // === PRESTIGE & DISPLAY ===
 function getPrestigeMultiplier() { return 1 + prestiges * 0.2; }
 function updatePrestigeDisplay() { prestigeDisplay.textContent = `Prestiges: ${prestiges} (x${getPrestigeMultiplier().toFixed(1)} KP/click)`; }
@@ -152,7 +240,7 @@ const upgrades = [
 
 // === CORE GAME ACTIONS ===
 clickBtn.addEventListener("click", () => { if (!isMuted) { clickSound.currentTime = 0; clickSound.play().catch(e => console.error("Audio play failed:", e)); } const pointsGained = kpPerClick * getPrestigeMultiplier(); kp += pointsGained; gameStats.totalKp += pointsGained; gameStats.totalClicks++; updateDisplay(); });
-function applyUpgrade(u, cost) { kp -= cost; u.effect(); u.count += 1; gameStats.upgradesPurchased++; updateDisplay(); if (![...glossaryList.children].some(li => li.dataset.name === u.name)) { const li = document.createElement("li"); li.className = "list-group-item"; li.dataset.name = u.name; li.innerHTML = `<strong>${u.name}</strong><p class="mb-0">${facts[u.name] || u.description}</p>`; glossaryList.appendChild(li); } }
+function applyUpgrade(u, cost) { kp -= cost; u.effect(); u.count += 1; gameStats.upgradesPurchased++; updateDisplay(); if (![...glossaryList.children].some(li => li.dataset.name === u.name)) { const li = document.createElement("li"); li.className = "list-group-item"; li.dataset.name = u.name; li.innerHTML = `<strong>${u.name}</strong><p class="mb-0">${facts[u.name] || u.description}</p>`; glossaryList.appendChild(li); } showQuiz(u.name); }
 
 // === RENDER UPGRADES ===
 function renderUpgrades() { upgrades.forEach((u, idx) => { if (idx === 0) u.unlocked = true; else if (!u.unlocked && kp >= u.baseCost * 0.7) u.unlocked = true; let btn = document.getElementById(`upgrade-${idx}`); if (u.unlocked && !btn) { btn = document.createElement("button"); btn.id = `upgrade-${idx}`; btn.className = "list-group-item list-group-item-action"; btn.type = "button"; btn.addEventListener("mouseenter", (e) => { tooltip.textContent = u.description; tooltip.classList.remove("hidden"); positionTooltip(e); }); btn.addEventListener("mousemove", positionTooltip); btn.addEventListener("mouseleave", () => { tooltip.classList.remove("visible"); tooltip.classList.add("hidden"); }); btn.addEventListener("click", () => { const currentCost = Math.floor(u.baseCost * Math.pow(1.15, u.count)); if (kp >= currentCost) { if (!isMuted) { upgradeSound.currentTime = 0; upgradeSound.play().catch(e => console.error("Audio play failed:", e)); } applyUpgrade(u, currentCost); } }); upgradeContainer.appendChild(btn); if (u.unlocked && !u._factShown && facts[u.name]) { factText.textContent = facts[u.name]; factCard.classList.remove("hidden"); u._factShown = true; } } if (btn) { const cost = Math.floor(u.baseCost * Math.pow(1.15, u.count)); btn.disabled = kp < cost; btn.innerHTML = `${u.name} <span class="badge bg-primary float-end">${cost} KP</span>`; } }); }
