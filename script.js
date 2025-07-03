@@ -55,7 +55,7 @@ const quizData = [
             "A function that calls itself."
         ],
         correctAnswer: "A method to run a block of code a specific number of times.",
-        asked: false, // We'll use this to make sure we only ask once
+        asked: false,
     },
     {
         id: "Recursion",
@@ -79,6 +79,121 @@ const quizData = [
             "1, 3, 5"
         ],
         correctAnswer: "1, 1, 2",
+        asked: false,
+    },
+    {
+        id: "Exponentiation",
+        question: "What does the expression 2^4 (2 to the power of 4) mean?",
+        options: [
+            "2 * 4",
+            "2 + 2 + 2 + 2",
+            "2 * 2 * 2 * 2",
+            "4 * 4"
+        ],
+        correctAnswer: "2 * 2 * 2 * 2",
+        asked: false,
+    },
+    {
+        id: "Sorting Algorithms",
+        question: "What is the main purpose of a sorting algorithm?",
+        options: [
+            "To make data random.",
+            "To arrange data into a specific order (e.g., numerical or alphabetical).",
+            "To delete unnecessary data from a collection.",
+            "To find the average value in a set of numbers."
+        ],
+        correctAnswer: "To arrange data into a specific order (e.g., numerical or alphabetical).",
+        asked: false,
+    },
+    {
+        id: "Binary Trees",
+        question: "In a binary tree data structure, what is the maximum number of children a single node can have?",
+        options: ["1", "2", "4", "Unlimited"],
+        correctAnswer: "2",
+        asked: false,
+    },
+    {
+        id: "Graph Theory",
+        question: "In graph theory, what is a 'vertex'?",
+        options: [
+            "The connection or line between two points.",
+            "A node or a point in the graph.",
+            "The direction of a connection.",
+            "The total length of all connections."
+        ],
+        correctAnswer: "A node or a point in the graph.",
+        asked: false,
+    },
+    {
+        id: "Big O Notation",
+        question: "What does Big O Notation describe about an algorithm?",
+        options: [
+            "How many lines of code it has.",
+            "How fast it runs on a specific computer.",
+            "How its performance scales as the input size grows.",
+            "The exact number of operations it performs."
+        ],
+        correctAnswer: "How its performance scales as the input size grows.",
+        asked: false,
+    },
+    {
+        id: "Turing Machine",
+        question: "A Turing Machine is a foundational concept in computer science. What is it a theoretical model of?",
+        options: [
+            "A physical computer hard drive.",
+            "Human consciousness.",
+            "A machine capable of universal computation.",
+            "A graphics rendering pipeline."
+        ],
+        correctAnswer: "A machine capable of universal computation.",
+        asked: false,
+    },
+    {
+        id: "Data Structures",
+        question: "Which of the following is a fundamental example of a data structure?",
+        options: [
+            "An 'if' statement",
+            "A 'for' loop",
+            "An array",
+            "A function"
+        ],
+        correctAnswer: "An array",
+        asked: false,
+    },
+    {
+        id: "Cryptography",
+        question: "What is the primary goal of cryptography?",
+        options: [
+            "To make text longer and more complex.",
+            "To secure communication and information.",
+            "To create interesting visual patterns.",
+            "To speed up data transfer over a network."
+        ],
+        correctAnswer: "To secure communication and information.",
+        asked: false,
+    },
+    {
+        id: "Machine Learning",
+        question: "What is the core concept behind machine learning?",
+        options: [
+            "Building computers that can physically move.",
+            "Writing programs with explicit, hard-coded rules for every situation.",
+            "Allowing computers to learn patterns and make predictions from data.",
+            "Designing faster and more efficient microchips."
+        ],
+        correctAnswer: "Allowing computers to learn patterns and make predictions from data.",
+        asked: false,
+    },
+    {
+        id: "Prestige",
+        question: "In the context of idle/incremental games, what does 'prestiging' typically involve?",
+        options: [
+            "Unlocking a new story chapter.",
+            "Resetting your progress in exchange for a permanent boost.",
+            "Deleting your save file permanently.",
+            "Changing the game's color scheme."
+        ],
+        correctAnswer: "Resetting your progress in exchange for a permanent boost.",
         asked: false,
     }
 ];
