@@ -314,7 +314,16 @@ function updatePrestigeDisplay() { prestigeDisplay.textContent = `Prestiges: ${p
 function updateDisplay() { display.textContent = `Knowledge Points: ${Math.floor(kp)}`; updatePrestigeDisplay(); }
 
 // === TOOLTIP POSITIONER ===
-function positionTooltip(e) { const offset = 12; const { width, height } = tooltip.getBoundingClientRect(); let x = e.clientX + offset; let y = e.clientY + offset; if (x + width > window.innerWidth) x = e.clientX - width - offset; if (y + height > window.innerHeight) y = e.clientY - height - offset; tooltip.style.left = `${x}px`; tooltip.style.top = `${y}px`; }
+function positionTooltip(e) { 
+    const offset = 12; 
+    const { width, height } = tooltip.getBoundingClientRect(); 
+    let x = e.clientX + offset; 
+    let y = e.clientY + offset; 
+    if (x + width > window.innerWidth) x = e.clientX - width - offset; 
+    if (y + height > window.innerHeight) y = e.clientY - height - offset; 
+    tooltip.style.left = `${x}px`; 
+    tooltip.style.top = `${y}px`; 
+}
 
 // === FACTS & GLOSSARY ===
 const facts = {
@@ -337,7 +346,6 @@ glossaryBtn.addEventListener("click", () => glossaryModal.show());
 
 // === UPGRADE DATA ===
 const upgrades = [
-    // ... (Your upgrades array remains unchanged) ...
     { name: "Loops", baseCost: 25, count: 0, effect: () => { kpPerSecond += 1; }, description: "Teaches repetitive tasks — +1 KP/sec", unlocked: false },
     { name: "Recursion", baseCost: 100, count: 0, effect: () => { kpPerClick = kpPerClick * 1.2 + 2; }, description: "Modest recursive boost — +2 KP/click & +20%", unlocked: false },
     { name: "Fibonacci", baseCost: 200, count: 0, effect: () => { kpPerSecond += 5; }, description: "Generates a recursive math sequence — +5 KP/sec", unlocked: false },
@@ -355,11 +363,107 @@ const upgrades = [
 
 // === CORE GAME ACTIONS ===
 clickBtn.addEventListener("click", () => { if (!isMuted) { clickSound.currentTime = 0; clickSound.play().catch(e => console.error("Audio play failed:", e)); } const pointsGained = kpPerClick * getPrestigeMultiplier(); kp += pointsGained; gameStats.totalKp += pointsGained; gameStats.totalClicks++; updateDisplay(); });
-function applyUpgrade(u, cost) { kp -= cost; u.effect(); u.count += 1; gameStats.upgradesPurchased++; updateDisplay(); if (![...glossaryList.children].some(li => li.dataset.name === u.name)) { const li = document.createElement("li"); li.className = "list-group-item"; li.dataset.name = u.name; li.innerHTML = `<strong>${u.name}</strong><p class="mb-0">${facts[u.name] || u.description}</p>`; glossaryList.appendChild(li); } showQuiz(u.name); }
+
+function applyUpgrade(u, cost) {
+    kp -= cost; 
+    u.effect(); 
+    u.count += 1; 
+    gameStats.upgradesPurchased++; 
+    updateDisplay(); 
+    if (![...glossaryList.children].some(li => li.dataset.name === u.name)) { 
+        const li = document.createElement("li");
+        li.className = "list-group-item"; 
+        li.dataset.name = u.name; li.innerHTML = `<strong>${u.name}</strong><p class="mb-0">${facts[u.name] || u.description}</p>`; 
+        glossaryList.appendChild(li); 
+    } 
+    showQuiz(u.name); 
+}
 
 // === RENDER UPGRADES ===
-function renderUpgrades() { upgrades.forEach((u, idx) => { if (idx === 0) u.unlocked = true; else if (!u.unlocked && kp >= u.baseCost * 0.7) u.unlocked = true; let btn = document.getElementById(`upgrade-${idx}`); if (u.unlocked && !btn) { btn = document.createElement("button"); btn.id = `upgrade-${idx}`; btn.className = "list-group-item list-group-item-action"; btn.type = "button"; btn.addEventListener("mouseenter", (e) => { tooltip.textContent = u.description; tooltip.classList.remove("hidden"); positionTooltip(e); }); btn.addEventListener("mousemove", positionTooltip); btn.addEventListener("mouseleave", () => { tooltip.classList.remove("visible"); tooltip.classList.add("hidden"); }); btn.addEventListener("click", () => { const currentCost = Math.floor(u.baseCost * Math.pow(1.15, u.count)); if (kp >= currentCost) { if (!isMuted) { upgradeSound.currentTime = 0; upgradeSound.play().catch(e => console.error("Audio play failed:", e)); } applyUpgrade(u, currentCost); } }); upgradeContainer.appendChild(btn); if (u.unlocked && !u._factShown && facts[u.name]) { factText.textContent = facts[u.name]; factCard.classList.remove("hidden"); u._factShown = true; } } if (btn) { const cost = Math.floor(u.baseCost * Math.pow(1.15, u.count)); btn.disabled = kp < cost; btn.innerHTML = `${u.name} <span class="badge bg-primary float-end">${cost} KP</span>`; } }); }
+function renderUpgrades() {
+    // Loop through each upgrade object in the 'upgrades' array.
+    // 'u' is the upgrade object, and 'idx' is its index.
+    upgrades.forEach((u, idx) => {
 
+        // --- Unlock Logic ---
+        // The first upgrade is always unlocked.
+        if (idx === 0) {
+            u.unlocked = true;
+        } 
+        // Unlock other upgrades if the player has at least 70% of the base cost.
+        else if (!u.unlocked && kp >= u.baseCost * 0.7) {
+            u.unlocked = true;
+        }
+
+        // Try to find an existing button for this upgrade in the DOM.
+        let btn = document.getElementById(`upgrade-${idx}`);
+
+        // --- Button Creation ---
+        // If the upgrade is unlocked but its button doesn't exist yet, create it.
+        if (u.unlocked && !btn) {
+            // Create a new button element.
+            btn = document.createElement("button");
+            btn.id = `upgrade-${idx}`;
+            btn.className = "list-group-item list-group-item-action";
+            btn.type = "button";
+
+            // --- Event Listeners for Tooltip ---
+            btn.addEventListener("mouseenter", (e) => {
+                tooltip.textContent = u.description;
+                tooltip.classList.remove("hidden");
+                positionTooltip(e); // Position the tooltip near the cursor.
+            });
+
+            btn.addEventListener("mousemove", positionTooltip);
+
+            btn.addEventListener("mouseleave", () => {
+                tooltip.classList.remove("visible");
+                tooltip.classList.add("hidden");
+            });
+
+            // --- Event Listener for Purchasing ---
+            btn.addEventListener("click", () => {
+                // Calculate the current cost of the upgrade, which increases with each purchase.
+                const currentCost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
+
+                // Check if the player has enough Knowledge Points (kp) to afford it.
+                if (kp >= currentCost) {
+                    // Play a sound effect if audio is not muted.
+                    if (!isMuted) {
+                        upgradeSound.currentTime = 0; // Rewind the sound to the start.
+                        upgradeSound.play().catch(e => console.error("Audio play failed:", e));
+                    }
+                    // Apply the upgrade's effects.
+                    applyUpgrade(u, currentCost);
+                }
+            });
+
+            // Add the newly created button to the upgrade container in the DOM.
+            upgradeContainer.appendChild(btn);
+
+            // --- Show Associated Fact ---
+            // If a fact for this upgrade exists and hasn't been shown, display it.
+            if (u.unlocked && !u._factShown && facts[u.name]) {
+                factText.textContent = facts[u.name];
+                factCard.classList.remove("hidden");
+                u._factShown = true; // Mark the fact as shown.
+            }
+        }
+
+        // --- Button State Update ---
+        // If the button exists (either newly created or pre-existing), update its state.
+        if (btn) {
+            // Recalculate the cost for display purposes.
+            const cost = Math.floor(u.baseCost * Math.pow(1.15, u.count));
+            
+            // Disable the button if the player can't afford the upgrade.
+            btn.disabled = kp < cost;
+            
+            // Update the button's text to show the upgrade name and its current cost.
+            btn.innerHTML = `${u.name} <span class="badge bg-primary float-end">${cost} KP</span>`;
+        }
+    });
+}
 
 // === SAVE & LOAD ===
 function saveGame() {
@@ -411,7 +515,14 @@ function loadGame() {
 
 
 // === GAME LOOP ===
-function gameLoop() { const passiveKp = kpPerSecond / 10; kp += passiveKp; gameStats.totalKp += passiveKp; updateDisplay(); renderUpgrades(); checkAchievements(); }
+function gameLoop() {
+    const passiveKp = kpPerSecond / 10;
+    kp += passiveKp;
+    gameStats.totalKp += passiveKp;
+    updateDisplay(); 
+    renderUpgrades(); 
+    checkAchievements(); 
+}
 
 // --- INITIALIZE GAME ---
 loadGame();
