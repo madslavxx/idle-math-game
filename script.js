@@ -290,7 +290,11 @@ function showQuiz(upgradeId) {
 
     // Function to handle the user's answer
     const handleAnswer = (selectedAnswer) => {
-        optionsContainerEl.style.display = 'none'; // Hide answer buttons
+        const allAnswerButtons = optionsContainerEl.querySelectorAll('button');
+        allAnswerButtons.forEach(button => {
+            button.disabled = true;
+        });
+
         feedbackTextEl.style.display = 'block';   // Show feedback area
         modalFooter.style.display = 'block';      // Show the 'Continue' button
 
@@ -314,7 +318,7 @@ function updatePrestigeDisplay() { prestigeDisplay.textContent = `Prestiges: ${p
 function updateDisplay() { display.textContent = `Knowledge Points: ${Math.floor(kp)}`; updatePrestigeDisplay(); }
 
 // === TOOLTIP POSITIONER ===
-function positionTooltip(e) { 
+function positionTooltip(e) {
     const offset = 12; 
     const { width, height } = tooltip.getBoundingClientRect(); 
     let x = e.clientX + offset; 
