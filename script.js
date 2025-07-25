@@ -14,9 +14,9 @@ let isMuted = false;
 let gameStats = { totalClicks: 0, totalKp: 0, upgradesPurchased: 0 };
 
 // === SOUND EFFECTS & MUTE TOGGLE ===
-const clickSound = new Audio('sounds/click.mp3');
-const upgradeSound = new Audio('sounds/upgrade.mp3');
-const prestigeSound = new Audio('sounds/prestige.mp3');
+const clickSound = new Audio('sounds/click.wav');
+const upgradeSound = new Audio('sounds/upgrade.wav');
+const prestigeSound = new Audio('sounds/prestige.wav');
 const achievementSound = new Audio('sounds/achievement.mp3');
 [clickSound, upgradeSound, prestigeSound, achievementSound].forEach(sound => sound.load());
 
