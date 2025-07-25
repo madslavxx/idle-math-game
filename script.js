@@ -362,7 +362,36 @@ const upgrades = [
     { name: "Data Structures", baseCost: 8000, count: 0, effect: () => { kpPerSecond += 80; }, description: "Organize information for faster access — +80 KP/sec", unlocked: false },
     { name: "Cryptography", baseCost: 12000, count: 0, effect: () => { kpPerClick *= 2; }, description: "Secure your knowledge, doubling its impact — x2 KP/click", unlocked: false },
     { name: "Machine Learning", baseCost: 20000, count: 0, effect: () => { kpPerSecond *= 2; }, description: "Let the knowledge generate itself — x2 KP/sec", unlocked: false },
-    { name: "Prestige", baseCost: 100000, count: 0, effect: () => { document.body.style.transition = 'opacity 0.8s ease'; document.body.style.opacity = '0'; setTimeout(() => { if (!isMuted) { prestigeSound.currentTime = 0; prestigeSound.play(); } prestiges += 1; kp = 0; kpPerClick = 1; kpPerSecond = 0; upgrades.forEach(u => { if (u.name !== 'Prestige') { u.unlocked = false; u.count = 0; } }); upgradeContainer.innerHTML = ''; updateDisplay(); renderUpgrades(); saveGame(); document.body.style.opacity = '1'; }, 800); }, description: "Reset progress for a permanent KP boost", unlocked: false }
+    {
+    name: "Prestige",
+    baseCost: 100000,
+    count: 0,
+    effect: () => {
+        resetOverlay.classList.add("active");
+
+        // --- Add screen shake ---
+        document.body.classList.add("screen-shake");
+
+        setTimeout(() => {
+            if (!isMuted) { prestigeSound.currentTime = 0; prestigeSound.play(); }
+            prestiges += 1;
+            kp = 0;
+            kpPerClick = 1;
+            kpPerSecond = 0;
+            upgrades.forEach(u => { if (u.name !== 'Prestige') { u.unlocked = false; u.count = 0; } });
+            upgradeContainer.innerHTML = '';
+            updateDisplay();
+            renderUpgrades();
+            saveGame();
+            resetOverlay.classList.remove("active");
+            
+            // --- Remove screen shake after it finishes ---
+            document.body.classList.remove("screen-shake");
+        }, 800);
+    },
+    description: "Reset progress for a permanent KP boost",
+    unlocked: false
+    }
 ];
 
 // === CORE GAME ACTIONS ===
