@@ -134,3 +134,25 @@ body {
 .hidden {
   display: none !important;
 }
+
+/* === WOW EFFECTS === */
+.floating-number {
+  position: absolute; /* Needed to position based on the cursor */
+  color: #0f0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  pointer-events: none; /* So it doesn't interfere with clicks */
+  z-index: 9999;
+  animation: float-up 1.5s ease-out forwards;
+}
+
+@keyframes float-up {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-80px); /* How high the number floats */
+  }
+}

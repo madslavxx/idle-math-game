@@ -366,7 +366,28 @@ const upgrades = [
 ];
 
 // === CORE GAME ACTIONS ===
-clickBtn.addEventListener("click", () => { if (!isMuted) { clickSound.currentTime = 0; clickSound.play().catch(e => console.error("Audio play failed:", e)); } const pointsGained = kpPerClick * getPrestigeMultiplier(); kp += pointsGained; gameStats.totalKp += pointsGained; gameStats.totalClicks++; updateDisplay(); });
+clickBtn.addEventListener("click", (e) => { // 'e' is the click event
+    if (!isMuted) { clickSound.currentTime = 0; clickSound.play().catch(err => console.error("Audio play failed:", err)); }
+    const pointsGained = kpPerClick * getPrestigeMultiplier();
+    kp += pointsGained;
+    gameStats.totalKp += pointsGained;
+    gameStats.totalClicks++;
+    updateDisplay();
+
+    // --- Create the floating number ---
+    const number = document.createElement("div");
+    number.className = "floating-number";
+    number.textContent = `+${Math.floor(pointsGained)}`;
+    // Position it at the cursor
+    number.style.left = `${e.clientX}px`;
+    number.style.top = `${e.clientY}px`;
+    document.body.appendChild(number);
+
+    // Clean up the element after the animation finishes
+    setTimeout(() => {
+        number.remove();
+    }, 1500); // Must match the animation duration
+});
 
 function applyUpgrade(u, cost) {
     kp -= cost; 
